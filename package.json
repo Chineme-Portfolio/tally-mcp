@@ -1,0 +1,41 @@
+{
+  "name": "helm",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "description": "Helm, a personal MCP server on the MCP Apps standard. Module one is a launch readiness board. This build is the Layer 0 render spike (spec 0001).",
+  "engines": {
+    "node": ">=22"
+  },
+  "scripts": {
+    "dev": "concurrently -n widget,server -c blue,green \"npm:dev:widget\" \"npm:dev:server\"",
+    "dev:widget": "vite build --watch --config vite.widget.config.ts",
+    "dev:server": "tsx watch src/server/index.ts",
+    "build": "npm run build:widget",
+    "build:widget": "vite build --config vite.widget.config.ts",
+    "typecheck": "tsc --noEmit",
+    "start": "tsx src/server/index.ts"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/ext-apps": "^1.7.0",
+    "@modelcontextprotocol/sdk": "^1.29.0",
+    "cors": "^2.8.5",
+    "express": "^5.1.0",
+    "react": "^19.2.0",
+    "react-dom": "^19.2.0",
+    "tsx": "^4.19.2",
+    "zod": "^4.1.13"
+  },
+  "devDependencies": {
+    "@types/cors": "^2.8.17",
+    "@types/express": "^5.0.0",
+    "@types/node": "^22.10.0",
+    "@types/react": "^19.2.2",
+    "@types/react-dom": "^19.2.2",
+    "@vitejs/plugin-react": "^4.3.4",
+    "concurrently": "^9.1.0",
+    "typescript": "^5.9.3",
+    "vite": "^6.0.0",
+    "vite-plugin-singlefile": "^2.3.0"
+  }
+}

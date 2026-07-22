@@ -1,0 +1,14 @@
+import { McpServer } from "@modelcontextprotocol/sdk/server/mcp.js";
+import { registerSpike } from "./modules/spike/index.js";
+
+// Builds a fresh MCP server instance. The transport calls this once per request
+// (stateless streamable HTTP), so keep per request state out of here; the spike
+// counter lives at module scope in modules/spike/state.ts.
+//
+// Adding a real module later is the same shape: import its register function
+// and call it here (foundation.md section 9, the module pattern).
+export function createServer(): McpServer {
+  const server = new McpServer({ name: "helm", version: "0.1.0" });
+  registerSpike(server);
+  return server;
+}
