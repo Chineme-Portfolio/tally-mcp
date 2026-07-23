@@ -9,6 +9,7 @@ import {
   AddInput,
   DeleteInput,
   EditInput,
+  MoveInput,
   ReorderInput,
   SetStatusInput,
 } from "../../../shared/launch.js";
@@ -17,6 +18,7 @@ import {
   deleteItem,
   editItem,
   listBoard,
+  moveItem,
   reorder,
   resetBoard,
   setStatus,
@@ -150,7 +152,23 @@ export function registerLaunch(server: McpServer): void {
     async () => toolResult(await resetBoard()),
   );
 
-  // App only: reorder is a drag gesture. The widget calls it; the model cannot.
+  // Move one task to a position (model+app). Claude's conversational reorder
+  // ("move X to the top"); the widget uses drag + launch_item_reorder instead.
+  registerAppTool(
+    server,
+    "launch_item_move",
+    {
+      title: "Move a task",
+      description:
+        "Moves a task to a new position (0 is the top). Use this to reorder the board from the conversation.",
+      inputSchema: MoveInput.shape,
+      _meta: { ui: { visibility: ["model", "app"] } },
+    },
+    async (args) => toolResult(await moveItem(args.id, args.position)),
+  );
+
+  // App only: reorder takes the whole new order (what a drag produces). The
+  // widget calls it; the model cannot. Claude reorders via launch_item_move.
   registerAppTool(
     server,
     "launch_item_reorder",

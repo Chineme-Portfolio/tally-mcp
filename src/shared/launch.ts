@@ -34,3 +34,7 @@ export const EditInput = z.object({ id: z.string().uuid(), title });
 export const SetStatusInput = z.object({ id: z.string().uuid(), status: LaunchItemStatus });
 export const DeleteInput = z.object({ id: z.string().uuid() });
 export const ReorderInput = z.object({ orderedIds: z.array(z.string().uuid()) });
+export const MoveInput = z.object({
+  id: z.string().uuid(),
+  position: z.number().int().nonnegative(),
+});

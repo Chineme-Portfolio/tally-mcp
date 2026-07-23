@@ -59,7 +59,10 @@ Build the launch readiness board as module one: a `users` table, a thin `modules
 | `launch_item_set_status` | `{ id, status }` | `{ item, items, readiness }` | model + app | not found, bad status |
 | `launch_item_delete` | `{ id }` | `{ items, readiness }` | model + app | not found |
 | `launch_board_reset` | none | `{ items, readiness }` | model + app | none |
+| `launch_item_move` | `{ id, position }` | `{ items, readiness }` | model + app | not found; position clamped to range |
 | `launch_item_reorder` | `{ orderedIds }` | `{ items, readiness }` | **app** only | applies the given order, appends any of the user's items not in the list at the end, ignores unknown ids |
+
+> **Post-build change (2026-07-23):** `launch_item_move` (model+app, "move one item to a position") was added after real use showed Claude should be able to reorder in conversation. `launch_item_reorder` stays app only for the drag (it takes the whole new order); the two tools split cleanly by actor (`foundation.md` §7 #11, now v4).
 
 Plus the **`launch-board`** MCP prompt (a canned "show my launch readiness board" that triggers `launch_board_show`).
 

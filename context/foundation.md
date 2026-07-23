@@ -1,6 +1,6 @@
 # Helm — Foundation
 
-> **Status:** v3 — converged. Last updated 2026-07-23. Changes from v2: task state moved from a binary `done` to a **four-state `status`** (todo / active / blocked / done) with a readiness meter (§5, §7 #16); the tool surface refined accordingly (`launch_item_toggle` → `launch_item_set_status`, and `launch_status` now carries the structured board state the widget fetches on mount) (§6, §8); the two §12 build-time items resolved. Driven by spec `0002-launch-board`.
+> **Status:** v4 — converged. Last updated 2026-07-23. Changes from v3: added **`launch_item_move`** (model + app) so Claude can reorder the board in conversation ("move X to the top"), after real use showed reordering is a genuine thing Claude should do; `launch_item_reorder` stays **app only** for the drag (it takes the whole new order a drag produces), so the app/model split is kept and made sharper (§6, §7 #11). (v3: binary `done` → a **four-state `status`** with a readiness meter, and `launch_item_toggle` → `launch_item_set_status` with `launch_status` carrying the structured board state; v2: rendering verified on both surfaces. Driven by spec `0002-launch-board`.)
 > Source of truth. Every other file references this; none restate it. If any file disagrees with this one, this one wins.
 > Codename `Helm` is a placeholder until the name is locked — find-and-replace when it is.
 
@@ -68,7 +68,7 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 
 - **Flow A — render / jump-back:** user picks the `/launch-board` **prompt** (or just asks) → Claude calls `launch_board_show` **tool** → widget renders with current items. The prompt is the discoverable trigger; the tool does the work.
 - **Flow B — widget interaction:** user clicks / drags in the widget → widget calls the tools via `tools/call` (add / edit / set status / delete / reset are model+app; **reorder is app-only**) → server persists → widget re-renders.
-- **Flow C — Claude operates the board:** user tells Claude "add X" / "mark Y done" → Claude calls the *same* model+app tools → server persists.
+- **Flow C — Claude operates the board:** user tells Claude "add X" / "mark Y done" / "move X to the top" → Claude calls the *same* model+app tools (including `launch_item_move` for reordering) → server persists.
 - **Flow D — Claude reasons about state:** Claude calls `launch_status` → reads current state as text/structured → discusses it in conversation ("4 of 7 done; blockers left are DNS and billing").
 
 **Module-one tool surface:**
@@ -82,7 +82,8 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 | `launch_item_set_status` | model + app | Claude + widget | set `todo` / `active` / `blocked` / `done` (the checkbox uses `done` ↔ `todo`) |
 | `launch_item_delete` | model + app | Claude + widget | delete an item |
 | `launch_board_reset` | model + app | Claude + widget | set every item back to `todo` |
-| `launch_item_reorder` | **app** | widget only | persist drag-reorder — the deliberate `visibility:["app"]` showcase (§7 #11) |
+| `launch_item_move` | model + app | Claude + widget | move one item to a position (Claude's conversational reorder: "move X to the top") |
+| `launch_item_reorder` | **app** | widget only | persist a drag-reorder (the whole new order a drag produces) — the deliberate `visibility:["app"]` showcase (§7 #11) |
 
 **Prompt:** `launch-board` — canned instruction ("show my launch-readiness board") that triggers `launch_board_show`. Discoverable in the client; advertises the capability to anyone who connects.
 
@@ -101,7 +102,7 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 | 8 | **Zod** for validation (tool inputs, env, DB boundary) | Pairs naturally with MCP tool schemas; one source of truth for shapes | Hand-written validation |
 | 9 | **A "module" = tool-prefix + `ui://` widget + own tables + registry row** (the keystone) | Honest per-module extensibility; module two adds four things and touches nothing in module one | Generic EAV `items` table with a `type` column (false extensibility) |
 | 10 | **Reads and writes are both model+app** so Claude *and* the widget operate the board | The builder explicitly wants Claude to CRUD the board, not just read it | Writes app-only (would block Claude from mutating — the opposite of the goal) |
-| 11 | **Item reordering is in v1, implemented as the app-only tool `launch_item_reorder`** | Drag-to-reorder is a genuine UI-only gesture — the most natural `visibility:["app"]` example — so one clean app-only tool both ships a wanted feature and showcases the pattern | Make all writes app-only (conflicts #10); add a separate `prefs` app-only tool too (extra scope, no added teaching value — deferred) |
+| 11 | **Reordering has two tools: `launch_item_reorder` (app-only, the drag's whole-order payload) and `launch_item_move` (model+app, one item to a position)** | Real use showed Claude should be able to reorder ("move X to the top"), but a drag naturally produces the *full* new order (so app-only fits) while Claude naturally moves *one* item (so model+app fits) — two actors, two inputs, and the `visibility:["app"]` showcase stays honest. (Refined from the original "reorder is the single app-only showcase" after shipping.) | Only app-only reorder (blocks Claude, forces ugly rebuilds); only model+app reorder (loses the app-only showcase) |
 | 12 | Ship a **`launch-board` MCP prompt** as the discoverable render trigger | Reliable, discoverable "jump back," and advertises the capability to other users | Rely on natural-language phrasing only (undiscoverable) |
 | 13 | **Both Claude Desktop and claude.ai render MCP Apps widgets** (observed); Desktop is the primary demo bar | Empirically verified — a third-party widget rendered on claude.ai, and widgets render on Desktop | Assume only Desktop works (out of date), or block on claude.ai as a dependency |
 | 14 | **No standalone `security.md`** — security lives in `code-standards.md` | Low-sensitivity personal data; no third-party OAuth tokens, no health/financial data | Split out `security.md` (overkill for v1; revisit if multi-tenant) |

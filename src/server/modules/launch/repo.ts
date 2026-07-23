@@ -126,3 +126,30 @@ export async function reorder(orderedIds: string[]): Promise<BoardState> {
   });
   return boardState();
 }
+
+// Move one task to a target position (0 is the top). This is Claude's
+// conversational reorder ("move X to the top"); the widget's drag uses reorder()
+// instead. Added from real use (spec 0002 follow up).
+export async function moveItem(id: string, position: number): Promise<BoardState> {
+  const userId = resolveUserId();
+  await db.transaction(async (tx) => {
+    const rows = await tx
+      .select({ id: launchItems.id })
+      .from(launchItems)
+      .where(eq(launchItems.userId, userId))
+      .orderBy(asc(launchItems.position), asc(launchItems.createdAt));
+    const ids = rows.map((r) => r.id);
+    const from = ids.indexOf(id);
+    if (from === -1) throw new Error(`launch_item_move: item ${id} not found`);
+    ids.splice(from, 1);
+    const target = Math.max(0, Math.min(position, ids.length));
+    ids.splice(target, 0, id);
+    for (let i = 0; i < ids.length; i++) {
+      await tx
+        .update(launchItems)
+        .set({ position: i })
+        .where(and(eq(launchItems.userId, userId), eq(launchItems.id, ids[i]!)));
+    }
+  });
+  return boardState();
+}

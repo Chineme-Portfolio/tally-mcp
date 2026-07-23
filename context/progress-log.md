@@ -20,6 +20,13 @@ Category one of: `feature` · `fix` · `refactor` · `chore` · `decision` · `d
 
 ## Entries
 
+### [feature] Added launch_item_move (conversational reorder); foundation to v4
+- **Date:** 2026-07-23
+- **Area:** server, context, docs/specs
+- **What:** Real use in Claude Desktop surfaced that Claude could not reorder the board (`launch_item_reorder` is app only, so hidden from the model; Claude rebuilt the list to reorder). Added **`launch_item_move`** (model+app, `{ id, position }`) so Claude can reorder in conversation ("move X to the top"), keeping `launch_item_reorder` app only for the widget drag (it takes the whole new order a drag produces). Repo `moveItem` runs in one transaction; shared `MoveInput` schema. Updated `foundation.md` to **v4** (§6 tool table + Flow C, §7 #11) and spec 0002 (API table + a post-build note).
+- **Verified:** `tsc --noEmit` clean; the dev server (tsx watch) restarted with **9 tools**; `tools/list` shows `launch_item_move` as `model+app` and `launch_item_reorder` still `app` only; a move test reordered correctly (moved the last item to the top, then restored the board).
+- **Notes:** the app/model split is kept and sharpened — reorder (the drag's bulk order, app only) vs move (one item, model+app), two actors with two natural inputs. **Claude Desktop connectors need a reconnect/refresh to pick up the new tool.** A nice "shipping reveals the real requirement" moment.
+
 ### [feature] Launch board built (spec 0002), server side and build verified
 - **Date:** 2026-07-23
 - **Area:** server, widget, shared, db, infra
