@@ -1,0 +1,261 @@
+/* Helm — Color system
+   Base ramps sit on :root (theme-independent).
+   Semantic aliases flip per theme: light on :root, dark on [data-theme="dark"],
+   and via prefers-color-scheme unless [data-theme="light"] forces light.
+   All action / progress / completion cues resolve to the one signature copper. */
+
+:root {
+  /* ---- Signature: Helm Copper (signal · launch · complete) ---- */
+  --copper-50:  #fbebe3;
+  --copper-100: #f6d8c9;
+  --copper-200: #efbda4;
+  --copper-300: #e7a07e;
+  --copper-400: #e08a63;
+  --copper-500: #cf6e45;
+  --copper-600: #b85c3e;
+  --copper-700: #8a4229;
+  --copper-800: #6e351f;
+  --copper-900: #4e2416;
+
+  /* ---- Ink / graphite neutrals (slight cool cast) ---- */
+  --ink-0:   #ffffff;
+  --ink-25:  #fbfbfc;
+  --ink-50:  #f5f6f8;
+  --ink-100: #edeff2;
+  --ink-150: #e4e7ec;
+  --ink-200: #d6dae1;
+  --ink-300: #b8bec9;
+  --ink-400: #9198a5;
+  --ink-500: #697180;
+  --ink-600: #4a515e;
+  --ink-700: #343a45;
+  --ink-800: #22262e;
+  --ink-850: #191c22;
+  --ink-900: #12151a;
+  --ink-950: #0c0e12;
+
+  /* ---- Support hues (kept quiet — green always leads) ---- */
+  --amber-500: #f59e0b;
+  --amber-600: #d97706;
+  --amber-700: #b45309;
+  --red-400:   #f26d6d;
+  --red-500:   #e5484d;
+  --red-600:   #dc2626;
+  --red-700:   #c81e1e;
+  --steel-400: #7c93b3;
+  --steel-600: #3f5b82;
+}
+
+/* ================= LIGHT (default) ================= */
+:root {
+  color-scheme: light;
+
+  --canvas: var(--ink-25);
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: var(--ink-50);
+  --surface-hover: var(--ink-50);
+  --surface-active: var(--ink-100);
+
+  --border: var(--ink-150);
+  --border-strong: var(--ink-200);
+  --border-subtle: var(--ink-100);
+
+  --text-strong: var(--ink-900);
+  --text-body: var(--ink-700);
+  --text-muted: var(--ink-500);
+  --text-faint: var(--ink-400);
+
+  --primary: var(--copper-600);
+  --primary-hover: var(--copper-700);
+  --primary-active: var(--copper-800);
+  --primary-text: var(--copper-700);
+  --primary-surface: var(--copper-50);
+  --primary-surface-hover: var(--copper-100);
+  --primary-border: var(--copper-300);
+  --on-primary: #ffffff;
+  --focus-ring: var(--copper-500);
+
+  --success: var(--copper-600);
+  --success-text: var(--copper-700);
+  --success-surface: var(--copper-50);
+  --on-success: #ffffff;
+
+  --warning: var(--amber-600);
+  --warning-text: var(--amber-700);
+  --warning-surface: #fef3c7;
+  --on-warning: #3a2606;
+
+  --danger: var(--red-600);
+  --danger-hover: var(--red-700);
+  --danger-text: var(--red-700);
+  --danger-surface: #fee2e2;
+  --on-danger: #ffffff;
+
+  --info: var(--steel-600);
+  --info-surface: #eef2f8;
+
+  --glow-primary: rgba(207,110,69,0.28);
+  --gradient-brand: linear-gradient(135deg, var(--copper-500) 0%, var(--copper-700) 100%); /* @kind color */
+  --gradient-brand-soft: linear-gradient(140deg, var(--copper-50) 0%, #ffffff 72%); /* @kind color */
+  --grid-line: rgba(18,21,26,0.05); /* @kind color */
+}
+
+/* ================= DARK ================= */
+[data-theme="dark"] {
+  color-scheme: dark;
+
+  --canvas: #0d0f13;
+  --surface: #16191f;
+  --surface-raised: #1d2027;
+  --surface-sunken: #101318;
+  --surface-hover: #22262e;
+  --surface-active: #2a2f38;
+
+  --border: #2a2e37;
+  --border-strong: #3a404b;
+  --border-subtle: #202530;
+
+  --text-strong: #f4f6f8;
+  --text-body: #cdd2da;
+  --text-muted: #98a0ac;
+  --text-faint: #6c7481;
+
+  --primary: var(--copper-400);
+  --primary-hover: #ed9f7b;
+  --primary-active: #c86b48;
+  --primary-text: #eda07c;
+  --primary-surface: rgba(224,138,99,0.14);
+  --primary-surface-hover: rgba(224,138,99,0.22);
+  --primary-border: rgba(224,138,99,0.45);
+  --on-primary: #2e1408;
+  --focus-ring: #ed9f7b;
+
+  --success: var(--copper-400);
+  --success-text: #eda07c;
+  --success-surface: rgba(224,138,99,0.14);
+  --on-success: #2e1408;
+
+  --warning: var(--amber-500);
+  --warning-text: #fbbf24;
+  --warning-surface: rgba(245,158,11,0.15);
+  --on-warning: #241703;
+
+  --danger: var(--red-400);
+  --danger-hover: #ff9d9d;
+  --danger-text: #fb8b8b;
+  --danger-surface: rgba(242,109,109,0.15);
+  --on-danger: #2a0808;
+
+  --info: var(--steel-400);
+  --info-surface: rgba(124,147,179,0.15);
+
+  --glow-primary: rgba(224,138,99,0.45);
+  --gradient-brand: linear-gradient(135deg, var(--copper-400) 0%, var(--copper-600) 100%); /* @kind color */
+  --gradient-brand-soft: linear-gradient(140deg, rgba(224,138,99,0.12) 0%, rgba(22,25,31,0) 72%); /* @kind color */
+  --grid-line: rgba(255,255,255,0.045); /* @kind color */
+}
+
+/* System preference drives dark unless the host forces light (see [data-theme="light"] below) */
+@media (prefers-color-scheme: dark) {
+  :root {
+    color-scheme: dark;
+
+    --canvas: #0d0f13;
+    --surface: #16191f;
+    --surface-raised: #1d2027;
+    --surface-sunken: #101318;
+    --surface-hover: #22262e;
+    --surface-active: #2a2f38;
+
+    --border: #2a2e37;
+    --border-strong: #3a404b;
+    --border-subtle: #202530;
+
+    --text-strong: #f4f6f8;
+    --text-body: #cdd2da;
+    --text-muted: #98a0ac;
+    --text-faint: #6c7481;
+
+    --primary: var(--copper-400);
+    --primary-hover: #ed9f7b;
+    --primary-active: #c86b48;
+    --primary-text: #eda07c;
+    --primary-surface: rgba(224,138,99,0.14);
+    --primary-surface-hover: rgba(224,138,99,0.22);
+    --primary-border: rgba(224,138,99,0.45);
+    --on-primary: #2e1408;
+    --focus-ring: #ed9f7b;
+
+    --success: var(--copper-400);
+    --success-text: #eda07c;
+    --success-surface: rgba(224,138,99,0.14);
+    --on-success: #2e1408;
+
+    --warning: var(--amber-500);
+    --warning-text: #fbbf24;
+    --warning-surface: rgba(245,158,11,0.15);
+    --on-warning: #241703;
+
+    --danger: var(--red-400);
+    --danger-hover: #ff9d9d;
+    --danger-text: #fb8b8b;
+    --danger-surface: rgba(242,109,109,0.15);
+    --on-danger: #2a0808;
+
+    --info: var(--steel-400);
+    --info-surface: rgba(124,147,179,0.15);
+
+    --glow-primary: rgba(224,138,99,0.45);
+    --gradient-brand: linear-gradient(135deg, var(--copper-400) 0%, var(--copper-600) 100%); /* @kind color */
+    --gradient-brand-soft: linear-gradient(140deg, rgba(224,138,99,0.12) 0%, rgba(22,25,31,0) 72%); /* @kind color */
+    --grid-line: rgba(255,255,255,0.045); /* @kind color */
+  }
+}
+
+/* Explicit light scope — after the media query so a host or nested region can
+   force/reset light even when the OS prefers dark (equal specificity, later wins) */
+[data-theme="light"] {
+  color-scheme: light;
+  --canvas: var(--ink-25);
+  --surface: #ffffff;
+  --surface-raised: #ffffff;
+  --surface-sunken: var(--ink-50);
+  --surface-hover: var(--ink-50);
+  --surface-active: var(--ink-100);
+  --border: var(--ink-150);
+  --border-strong: var(--ink-200);
+  --border-subtle: var(--ink-100);
+  --text-strong: var(--ink-900);
+  --text-body: var(--ink-700);
+  --text-muted: var(--ink-500);
+  --text-faint: var(--ink-400);
+  --primary: var(--copper-600);
+  --primary-hover: var(--copper-700);
+  --primary-active: var(--copper-800);
+  --primary-text: var(--copper-700);
+  --primary-surface: var(--copper-50);
+  --primary-surface-hover: var(--copper-100);
+  --primary-border: var(--copper-300);
+  --on-primary: #ffffff;
+  --focus-ring: var(--copper-500);
+  --success: var(--copper-600);
+  --success-text: var(--copper-700);
+  --success-surface: var(--copper-50);
+  --on-success: #ffffff;
+  --warning: var(--amber-600);
+  --warning-text: var(--amber-700);
+  --warning-surface: #fef3c7;
+  --on-warning: #3a2606;
+  --danger: var(--red-600);
+  --danger-hover: var(--red-700);
+  --danger-text: var(--red-700);
+  --danger-surface: #fee2e2;
+  --on-danger: #ffffff;
+  --info: var(--steel-600);
+  --info-surface: #eef2f8;
+  --glow-primary: rgba(207,110,69,0.28);
+  --gradient-brand: linear-gradient(135deg, var(--copper-500) 0%, var(--copper-700) 100%); /* @kind color */
+  --gradient-brand-soft: linear-gradient(140deg, var(--copper-50) 0%, #ffffff 72%); /* @kind color */
+  --grid-line: rgba(18,21,26,0.05); /* @kind color */
+}

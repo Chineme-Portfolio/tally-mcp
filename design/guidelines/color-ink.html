@@ -1,0 +1,34 @@
+<!-- @dsCard group="Colors" viewport="700x180" name="Ink — graphite neutrals" subtitle="Slightly cool ink ramp for text, surfaces, and borders" -->
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;background:var(--surface);padding:20px;font-family:var(--font-sans)}
+.ramp{display:flex;border:1px solid var(--border);border-radius:var(--radius-md);overflow:hidden}
+.sw{flex:1;height:74px;display:flex;align-items:flex-end;justify-content:center;padding-bottom:7px}
+.sw b{font-family:var(--font-mono);font-size:10px;font-weight:600}
+.legend{display:flex;gap:18px;margin-top:13px;flex-wrap:wrap}
+.item{font-size:12px;color:var(--text-muted)}
+.item b{color:var(--text-strong);font-weight:600}
+</style></head><body>
+<div class="ramp">
+<div class="sw" style="background:var(--ink-0);border-right:1px solid var(--border)"><b style="color:#22262e">0</b></div>
+<div class="sw" style="background:var(--ink-50)"><b style="color:#22262e">50</b></div>
+<div class="sw" style="background:var(--ink-100)"><b style="color:#22262e">100</b></div>
+<div class="sw" style="background:var(--ink-200)"><b style="color:#22262e">200</b></div>
+<div class="sw" style="background:var(--ink-300)"><b style="color:#12151a">300</b></div>
+<div class="sw" style="background:var(--ink-400)"><b style="color:#fff">400</b></div>
+<div class="sw" style="background:var(--ink-500)"><b style="color:#fff">500</b></div>
+<div class="sw" style="background:var(--ink-600)"><b style="color:#fff">600</b></div>
+<div class="sw" style="background:var(--ink-700)"><b style="color:#fff">700</b></div>
+<div class="sw" style="background:var(--ink-800)"><b style="color:#fff">800</b></div>
+<div class="sw" style="background:var(--ink-900)"><b style="color:#fff">900</b></div>
+<div class="sw" style="background:var(--ink-950)"><b style="color:#fff">950</b></div>
+</div>
+<div class="legend">
+<span class="item"><b>900</b> headings</span>
+<span class="item"><b>700</b> body</span>
+<span class="item"><b>500</b> muted</span>
+<span class="item"><b>150</b> border</span>
+<span class="item"><b>25</b> canvas</span>
+</div>
+</body></html>

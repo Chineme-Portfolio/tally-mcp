@@ -1,0 +1,17 @@
+<!-- @dsCard group="Shape" viewport="700x200" name="Focus ring & completion glow" subtitle="The two green signals — attention, and the payoff" -->
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;background:var(--surface);padding:22px;font-family:var(--font-sans)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:center}
+.k{font-family:var(--font-mono);font-size:11px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint);margin-bottom:10px;display:block}
+.field{height:42px;display:flex;align-items:center;padding:0 12px;font-size:14px;color:var(--text-strong);background:var(--surface);border:1px solid var(--primary);border-radius:var(--radius-md);box-shadow:var(--ring)}
+.glow{background:var(--surface);border:1px solid var(--primary-border);border-radius:var(--radius-lg);box-shadow:var(--glow-complete);padding:14px}
+</style></head><body>
+<div class="grid">
+<div><span class="k">Focus ring</span><div class="field">Board name</div></div>
+<div><span class="k">Completion glow</span><div class="glow">
+<div class="helm-progress helm-progress--complete"><div class="helm-progress__head"><span class="helm-progress__label">Ready to ship</span><span class="helm-progress__value">100%</span></div><div class="helm-progress__track"><div class="helm-progress__fill" style="width:100%"></div></div></div>
+</div></div>
+</div>
+</body></html>

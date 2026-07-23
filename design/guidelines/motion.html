@@ -1,0 +1,29 @@
+<!-- @dsCard group="Motion" viewport="700x230" name="Motion — easing & timing" subtitle="Springy on the feedback moments; crisp everywhere else" -->
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;background:var(--surface);padding:22px;font-family:var(--font-sans)}
+.curves{display:flex;gap:16px;flex-wrap:wrap}
+.c{display:flex;flex-direction:column;gap:8px;align-items:center}
+.box{width:92px;height:64px;border:1px solid var(--border);border-radius:var(--radius-sm);background:var(--surface-sunken);overflow:visible;position:relative}
+.box svg{position:absolute;inset:8px;overflow:visible}
+.t{font-family:var(--font-mono);font-size:10px;color:var(--text-muted);text-align:center}
+.t b{display:block;color:var(--text-strong);font-size:11px}
+.dur{display:flex;gap:22px;margin-top:18px;flex-wrap:wrap;align-items:center}
+.d{font-family:var(--font-mono);font-size:12px;color:var(--text-muted)}
+.d b{color:var(--text-strong)}
+.note{margin-top:14px;font-size:12px;color:var(--text-faint)}
+</style></head><body>
+<div class="curves">
+<div class="c"><div class="box"><svg viewBox="0 0 100 100"><path d="M0,100 C20,100 0,0 100,0" fill="none" stroke="var(--text-faint)" stroke-width="3"/></svg></div><span class="t"><b>standard</b>.2,0,0,1</span></div>
+<div class="c"><div class="box"><svg viewBox="0 0 100 100"><path d="M0,100 C16,0 30,0 100,0" fill="none" stroke="var(--text-faint)" stroke-width="3"/></svg></div><span class="t"><b>out</b>.16,1,.3,1</span></div>
+<div class="c"><div class="box"><svg viewBox="0 0 100 100"><path d="M0,100 C34,-56 64,0 100,0" fill="none" stroke="var(--primary)" stroke-width="3"/></svg></div><span class="t"><b>spring</b>overshoot</span></div>
+<div class="c"><div class="box"><svg viewBox="0 0 100 100"><path d="M0,100 C22,-45 36,0 100,0" fill="none" stroke="var(--primary)" stroke-width="3"/></svg></div><span class="t"><b>spring-lg</b>bigger pop</span></div>
+</div>
+<div class="dur">
+<span class="d"><b>fast</b> 140ms</span>
+<span class="d"><b>base</b> 220ms</span>
+<span class="d"><b>slow</b> 360ms</span>
+</div>
+<p class="note">Spring easings drive check / complete / reorder. All durations collapse to 0 under prefers-reduced-motion.</p>
+</body></html>

@@ -1,0 +1,28 @@
+/* Helm — Motion
+   Springy on the feedback moments (check / complete / reorder); crisp elsewhere.
+   Durations collapse under prefers-reduced-motion (see base.css safety net too). */
+:root {
+  --dur-instant: 80ms;   /* @kind other */
+  --dur-fast: 140ms;     /* @kind other */
+  --dur: 220ms;          /* @kind other */
+  --dur-slow: 360ms;     /* @kind other */
+  --dur-slower: 520ms;   /* @kind other */
+
+  --ease-standard: cubic-bezier(0.2, 0, 0, 1);          /* @kind other */
+  --ease-out: cubic-bezier(0.16, 1, 0.3, 1);            /* @kind other */
+  --ease-in: cubic-bezier(0.5, 0, 0.75, 0);             /* @kind other */
+  --ease-spring: cubic-bezier(0.34, 1.56, 0.64, 1); /* @kind other */
+  --ease-spring-lg: cubic-bezier(0.22, 1.45, 0.36, 1); /* @kind other */
+}
+
+@media (prefers-reduced-motion: reduce) {
+  :root {
+    --dur-instant: 0ms; /* @kind other */
+    --dur-fast: 0ms; /* @kind other */
+    --dur: 0ms; /* @kind other */
+    --dur-slow: 0ms; /* @kind other */
+    --dur-slower: 0ms; /* @kind other */
+    --ease-spring: var(--ease-standard); /* @kind other */
+    --ease-spring-lg: var(--ease-standard); /* @kind other */
+  }
+}

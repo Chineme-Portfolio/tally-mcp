@@ -1,0 +1,24 @@
+<!-- @dsCard group="Brand" viewport="700x210" name="Wordmark" subtitle="No logo supplied — the name, set in Space Grotesk, is the mark" -->
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;background:var(--surface);padding:24px;font-family:var(--font-display)}
+.row{display:flex;align-items:stretch;gap:18px}
+.lockup{flex:1;display:flex;flex-direction:column;justify-content:center;gap:6px;border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px}
+.on-green{background:var(--gradient-brand);border-color:transparent}
+.mark{font-size:44px;font-weight:700;letter-spacing:-.03em;line-height:1}
+.mark .dot{color:var(--primary)}
+.on-light .mark{color:var(--text-strong)}
+.on-green .mark{color:#fff}
+.on-green .mark .dot{color:#2e1408}
+.tag{font-family:var(--font-mono);font-size:11px;letter-spacing:.14em;text-transform:uppercase}
+.on-light .tag{color:var(--text-muted)}
+.on-green .tag{color:rgba(255,255,255,.85)}
+.note{margin-top:14px;font-family:var(--font-sans);font-size:12px;color:var(--text-faint)}
+</style></head><body>
+<div class="row">
+<div class="lockup on-light"><span class="mark">Helm<span class="dot">.</span></span><span class="tag">Command surface for Claude</span></div>
+<div class="lockup on-green"><span class="mark">Helm<span class="dot">.</span></span><span class="tag">Command surface for Claude</span></div>
+</div>
+<p class="note">Wordmark stands in until a real mark is provided. The period is the only flourish — a small green "you are here".</p>
+</body></html>

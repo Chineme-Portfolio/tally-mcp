@@ -1,0 +1,53 @@
+<!-- @dsCard group="Components" viewport="700x340" name="Data — Badge, Tag, Status, Progress" subtitle="Status vocabulary and the readiness meter" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--surface);padding:22px;font-family:var(--font-sans)}
+.wrap{display:flex;flex-direction:column;gap:16px}
+.row{display:flex;flex-wrap:wrap;gap:8px;align-items:center}
+.k{font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;color:var(--text-faint);width:100%;margin-bottom:-6px}
+.meters{display:grid;grid-template-columns:1fr 1fr;gap:20px;margin-top:4px}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { Badge, Tag, Status, ProgressBar } = window.HelmDesignSystem_94b187;
+function App(){
+  return (
+    <div className="wrap">
+      <div className="row"><span className="k">Badge</span>
+        <Badge variant="neutral" dot>12 open</Badge>
+        <Badge variant="primary">Module 1</Badge>
+        <Badge variant="success" tone="solid" icon="check">Shipped</Badge>
+        <Badge variant="warning">Review</Badge>
+        <Badge variant="danger" dot>Blocked</Badge>
+        <Badge variant="info">Backlog</Badge>
+        <Badge tone="outline">Draft</Badge>
+      </div>
+      <div className="row"><span className="k">Status</span>
+        <Status status="todo" /><Status status="active" /><Status status="blocked" /><Status status="done" />
+      </div>
+      <div className="row"><span className="k">Tag</span>
+        <Tag icon="anchor">infra</Tag>
+        <Tag onClick={()=>{}} selected>Blocked</Tag>
+        <Tag onRemove={()=>{}}>staging</Tag>
+      </div>
+      <div className="meters">
+        <ProgressBar label="Launch readiness" value={7} max={10} valueFormat={(v,m)=>`${v} / ${m}`} />
+        <ProgressBar label="Ready to ship" value={100} />
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

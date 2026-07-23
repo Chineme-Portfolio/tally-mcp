@@ -20,6 +20,18 @@ Category one of: `feature` · `fix` · `refactor` · `chore` · `decision` · `d
 
 ## Entries
 
+### [docs] UI trio generated from the Claude Design export (Phase 3 complete)
+- **Date:** 2026-07-22
+- **Area:** context, design
+- **What:** Ingested the Claude Design export (the "Bold product" direction) and committed it to `design/` (109 files: tokens, the `helm-*` component library, guidelines, and the launch-board UI kit). Generated the UI trio from the real values: `ui-tokens.md` (copper + ink ramps, semantic aliases, type/spacing/radius/shadow/motion, theming), `ui-rules.md` (§0 prime directive + voice, colour discipline, motion, interaction states), `ui-registry.md` (20 components: `ChecklistItem`, `ProgressBar`, `Status`, `Button`, `Card`, and the primitives, all ⬜ planned until ported into `src/widget/`). Dropped the PENDING markers in `README.md` and rewrote `code-standards.md` §7 to point at the tokens.
+- **Notes:** Signature colour is **Helm Copper** (`#cf6e45`), not green — some export comments mislabel it "green"; the token names (`--copper-*`) and `design/readme.md` are authoritative. **Critical adaptation for our sandboxed widget:** the design ships fonts via a Google Fonts `@import` that will NOT load in the iframe, so the launch board build must self-host the `.woff2` or accept the system fallback (recorded in `ui-tokens.md`). `design/ui_kits/board/` is effectively the build reference for the launch board widget. Phase 3 of the context system is complete; the UI trio is no longer PENDING.
+
+### [feature] Render spike gate PASSED in Claude Desktop (spec 0001)
+- **Date:** 2026-07-22
+- **Area:** server, widget
+- **What:** Verified the render spike end to end in Claude Desktop, via a `cloudflared` tunnel to the local server. AC-1 (widget renders inline), AC-2 (count shown on mount), AC-3 (button increments), AC-4 (server observed the calls: `spike_state` reports `count=5` after five clicks), and AC-6 (`spike_ping` is app only, not offered to the model; independently confirmed by the connector exposing only `spike_show` + `spike_state`) all pass.
+- **Notes:** **The deepest risk (`foundation.md` §11) is retired** — our own MCP Apps pipeline renders and round trips inside Claude. AC-5 (Railway deploy) is the only remaining criterion; the local tunnel already proves the remote streamable HTTP path works, so AC-5 is the deploy specific proof. Spec 0001 stays `In Progress` until AC-5 is done or consciously deferred. (The backgrounded `dev.log` did not capture the ping `console.log` lines due to pipe buffering; the server state `count=5` is the authoritative confirmation.)
+
 ### [feature] Render spike built (spec 0001), server side verified
 - **Date:** 2026-07-22
 - **Area:** server, widget, shared, infra

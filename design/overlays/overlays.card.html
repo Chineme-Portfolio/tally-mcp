@@ -1,0 +1,45 @@
+<!-- @dsCard group="Components" viewport="700x320" name="Overlays — Dialog, Toast, Menu, Tooltip" subtitle="Modals, notices, and row actions" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<link rel="stylesheet" href="../styles.css">
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script src="../_ds_bundle.js"></script>
+<style>
+body{margin:0;background:var(--surface);padding:22px;font-family:var(--font-sans)}
+.grid{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}
+.left{display:flex;flex-direction:column;gap:12px}
+.tools{display:flex;gap:10px;align-items:center;padding-top:2px}
+.stage{position:relative;min-height:250px;background:var(--surface-sunken);border:1px solid var(--border);border-radius:var(--radius-lg);overflow:hidden}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script type="text/babel">
+const { Dialog, Toast, Menu, Tooltip, Button, IconButton } = window.HelmDesignSystem_94b187;
+function App(){
+  return (
+    <div className="grid">
+      <div className="left">
+        <Toast variant="success" title="Task completed" onClose={()=>{}}>2 to go before launch.</Toast>
+        <Toast variant="default" title="Board saved">Reordered 3 tasks.</Toast>
+        <div className="tools">
+          <Menu label="Task actions" items={[{label:'Edit',icon:'pencil'},{label:'Duplicate',icon:'copy'},{divider:true},{label:'Delete',icon:'trash',danger:true}]} />
+          <Tooltip label="Reorder"><IconButton icon="grip-vertical" label="Reorder" variant="secondary" /></Tooltip>
+          <Tooltip label="Add task" side="top"><IconButton icon="plus" label="Add" variant="primary" /></Tooltip>
+        </div>
+      </div>
+      <div className="stage">
+        <Dialog open contained onClose={()=>{}} title="Delete board?" description="This removes all 10 tasks. This can't be undone."
+          footer={<><Button variant="ghost" size="sm">Cancel</Button><Button variant="danger" size="sm" iconLeft="trash">Delete</Button></>} />
+      </div>
+    </div>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App/>);
+</script>
+</body>
+</html>

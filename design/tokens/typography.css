@@ -1,0 +1,53 @@
+/* Helm — Typography
+   Display: Space Grotesk (assured, geometric, command-console presence)
+   Body/UI: Hanken Grotesk (legible workhorse, warm-neutral)
+   Mono:    JetBrains Mono (operator labels, counts, timestamps, code) */
+
+:root {
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-sans: 'Hanken Grotesk', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+  --font-mono: 'JetBrains Mono', ui-monospace, 'SF Mono', 'Menlo', 'Consolas', monospace;
+
+  /* role aliases */
+  --font-heading: var(--font-display);
+  --font-body: var(--font-sans);
+  --font-code: var(--font-mono);
+
+  /* Type scale (px — predictable inside embedded widgets; 14px UI baseline) */
+  --text-2xs: 11px;
+  --text-xs:  12px;
+  --text-sm:  13px;
+  --text-base:14px;
+  --text-md:  15px;
+  --text-lg:  17px;
+  --text-xl:  20px;
+  --text-2xl: 24px;
+  --text-3xl: 30px;
+  --text-4xl: 38px;
+  --text-5xl: 48px;
+  --text-6xl: 64px;
+  --text-7xl: 84px;
+
+  /* Line height */
+  --leading-none: 1;
+  --leading-tight: 1.06;
+  --leading-snug: 1.2;
+  --leading-normal: 1.5;
+  --leading-relaxed: 1.65;
+
+  /* Weight */
+  --weight-regular: 400;
+  --weight-medium: 500;
+  --weight-semibold: 600;
+  --weight-bold: 700;
+  --weight-extrabold: 800;
+
+  /* Tracking */
+  --tracking-tighter: -0.03em;
+  --tracking-tight: -0.02em;
+  --tracking-snug: -0.01em;
+  --tracking-normal: 0;
+  --tracking-wide: 0.02em;
+  --tracking-wider: 0.08em;   /* uppercase mono eyebrows / labels */
+  --tracking-widest: 0.14em;
+}

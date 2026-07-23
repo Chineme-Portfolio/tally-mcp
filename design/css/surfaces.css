@@ -1,0 +1,14 @@
+/* Card — the surface primitive */
+.helm-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);box-shadow:var(--shadow-sm)}
+.helm-card--raised{box-shadow:var(--shadow-md);border-color:transparent}
+.helm-card--outline{box-shadow:none;border-color:var(--border-strong)}
+.helm-card--sunken{background:var(--surface-sunken);box-shadow:none}
+.helm-card--flat{box-shadow:none}
+.helm-card--pad-sm{padding:var(--space-3)}
+.helm-card--pad-md{padding:var(--space-5)}
+.helm-card--pad-lg{padding:var(--space-6)}
+.helm-card--interactive{cursor:pointer;transition:transform var(--dur) var(--ease-spring),box-shadow var(--dur) var(--ease-standard),border-color var(--dur) var(--ease-standard)}
+.helm-card--interactive:hover{transform:translateY(-2px);box-shadow:var(--shadow-lg);border-color:var(--border-strong)}
+.helm-card--interactive:active{transform:translateY(0)}
+.helm-card--interactive:focus-visible{outline:none;box-shadow:var(--ring)}
+.helm-card--complete{border-color:var(--primary-border);box-shadow:var(--glow-complete)}

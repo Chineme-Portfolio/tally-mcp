@@ -53,7 +53,13 @@ Single-tenant in v1, but treat `user_id` scoping as a boundary, not a formality:
 
 ## §7 Styling
 
-**PENDING** the UI trio (`ui-tokens.md`, `ui-rules.md`, `ui-registry.md`), which awaits the Claude Design export (Phase 3). Until then: minimal, neutral inline styles in the widget, written to be ripped out and replaced by tokens. **When the trio lands: tokens only — no raw hex, no off-palette values in components.**
+The UI trio is live: `ui-tokens.md` (the values), `ui-rules.md` (how they compose), `ui-registry.md` (the components), all generated from the design export at `design/`.
+
+- **Tokens only.** Components reference semantic tokens (`var(--primary)`, `var(--text-body)`, `var(--radius-md)`) — never raw hex, never a raw ramp step (`--copper-600`), never an off-palette value. *Why:* the look changes by changing a token, in one place, and light/dark stay correct for free.
+- **Check the registry before building any component** (`ui-registry.md`): reuse if built, port from `design/` if planned; if it is not listed, it is not designed (that is an `/architect` question).
+- **Follow `ui-rules.md`** for voice, colour discipline (copper leads), motion (springy on the feedback moments, collapses under `prefers-reduced-motion`), and the required interaction states (hover, press scale-down, focus ring).
+- **The widget is a sandboxed `vite-singlefile` iframe:** inline the token CSS; no external fonts or images (the design's Google Fonts `@import` will not load — self-host the `.woff2` or accept the system fallback, see `ui-tokens.md`). Stay theme-aware: light and dark via `data-theme` / `prefers-color-scheme`.
+- The render-spike widget's inline placeholder styles are the one exception — throwaway, replaced when the launch board is built on the tokens.
 
 ## §8 Error handling
 

@@ -1,0 +1,22 @@
+<!-- @dsCard group="Type" viewport="700x210" name="Mono — JetBrains Mono" subtitle="Operator labels, counts, timestamps, code" -->
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;background:var(--surface);padding:22px;font-family:var(--font-mono)}
+.row{display:flex;gap:26px;flex-wrap:wrap;align-items:flex-end}
+.b{display:flex;flex-direction:column;gap:6px}
+.k{font-family:var(--font-sans);font-size:10px;letter-spacing:.05em;text-transform:uppercase;color:var(--text-faint)}
+.eyebrow{font-size:12px;letter-spacing:.14em;text-transform:uppercase;color:var(--primary-text);font-weight:500}
+.count{font-size:34px;font-weight:700;color:var(--text-strong);letter-spacing:-.01em}
+.count small{color:var(--text-faint);font-weight:400}
+.ts{font-size:13px;color:var(--text-muted)}
+.code{margin-top:20px;font-size:13px;color:var(--text-body);background:var(--surface-sunken);border:1px solid var(--border);border-radius:var(--radius-sm);padding:11px 13px}
+.code .t{color:var(--primary-text)}
+</style></head><body>
+<div class="row">
+<div class="b"><span class="k">Eyebrow</span><span class="eyebrow">Launch readiness</span></div>
+<div class="b"><span class="k">Count</span><span class="count">07<small> / 10</small></span></div>
+<div class="b"><span class="k">Timestamp</span><span class="ts">edited 2m ago</span></div>
+</div>
+<div class="code"><span class="t">helm</span> board create "Launch readiness" --backend postgres</div>
+</body></html>

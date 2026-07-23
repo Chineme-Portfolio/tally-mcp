@@ -1,0 +1,46 @@
+/* Badge */
+.helm-badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-sans);font-size:var(--text-xs);font-weight:var(--weight-semibold);line-height:1;letter-spacing:var(--tracking-snug);white-space:nowrap;padding:4px 9px;border-radius:var(--radius-pill);border:1px solid transparent}
+.helm-badge--sm{font-size:var(--text-2xs);padding:2px 7px;gap:4px}
+.helm-badge__dot{width:6px;height:6px;border-radius:50%;background:currentColor;flex:none}
+.helm-badge--neutral{background:var(--surface-active);color:var(--text-body)}
+.helm-badge--primary{background:var(--primary-surface);color:var(--primary-text)}
+.helm-badge--success{background:var(--success-surface);color:var(--success-text)}
+.helm-badge--warning{background:var(--warning-surface);color:var(--warning-text)}
+.helm-badge--danger{background:var(--danger-surface);color:var(--danger-text)}
+.helm-badge--info{background:var(--info-surface);color:var(--info)}
+.helm-badge--solid.helm-badge--neutral{background:var(--text-strong);color:var(--surface)}
+.helm-badge--solid.helm-badge--primary{background:var(--primary);color:var(--on-primary)}
+.helm-badge--solid.helm-badge--success{background:var(--success);color:var(--on-success)}
+.helm-badge--solid.helm-badge--warning{background:var(--warning);color:var(--on-warning)}
+.helm-badge--solid.helm-badge--danger{background:var(--danger);color:var(--on-danger)}
+.helm-badge--solid.helm-badge--info{background:var(--info);color:#fff}
+.helm-badge--outline{background:transparent;border-color:var(--border-strong);color:var(--text-body)}
+
+/* Tag / chip */
+.helm-tag{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);font-size:var(--text-sm);font-weight:var(--weight-medium);line-height:1;color:var(--text-body);background:var(--surface-sunken);border:1px solid var(--border);border-radius:var(--radius-sm);padding:5px 9px;transition:background var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard),color var(--dur-fast) var(--ease-standard)}
+.helm-tag--interactive{cursor:pointer}
+.helm-tag--interactive:hover{border-color:var(--text-faint);color:var(--text-strong)}
+.helm-tag--selected{background:var(--primary-surface);border-color:var(--primary-border);color:var(--primary-text)}
+.helm-tag__remove{display:inline-flex;align-items:center;justify-content:center;margin:-2px -5px -2px 1px;padding:3px;border-radius:var(--radius-xs);color:var(--text-muted);cursor:pointer;transition:background var(--dur-fast),color var(--dur-fast)}
+.helm-tag__remove:hover{background:var(--surface-active);color:var(--text-strong)}
+
+/* Status pill */
+.helm-status{display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);font-size:var(--text-xs);font-weight:var(--weight-semibold);line-height:1;letter-spacing:var(--tracking-snug);white-space:nowrap;padding:4px 10px 4px 8px;border-radius:var(--radius-pill)}
+.helm-status__dot{width:7px;height:7px;border-radius:50%;background:currentColor;flex:none}
+.helm-status--todo{background:var(--surface-active);color:var(--text-muted)}
+.helm-status--active{background:var(--warning-surface);color:var(--warning-text)}
+.helm-status--blocked{background:var(--danger-surface);color:var(--danger-text)}
+.helm-status--done{background:var(--success-surface);color:var(--success-text)}
+
+/* Progress — the launch-readiness meter */
+.helm-progress{display:flex;flex-direction:column;gap:8px}
+.helm-progress__head{display:flex;align-items:baseline;justify-content:space-between;gap:12px}
+.helm-progress__label{font-family:var(--font-sans);font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--text-strong)}
+.helm-progress__value{font-family:var(--font-mono);font-size:var(--text-sm);font-weight:var(--weight-medium);color:var(--text-muted);font-variant-numeric:tabular-nums}
+.helm-progress__track{position:relative;height:10px;border-radius:var(--radius-pill);background:var(--surface-active);overflow:hidden;transition:box-shadow var(--dur-slow) var(--ease-standard)}
+.helm-progress__fill{position:absolute;top:0;left:0;bottom:0;border-radius:var(--radius-pill);background:var(--primary);transition:width var(--dur-slow) var(--ease-spring),background var(--dur) var(--ease-standard)}
+.helm-progress--sm .helm-progress__track{height:6px}
+.helm-progress--lg .helm-progress__track{height:14px}
+.helm-progress--complete .helm-progress__fill{background:var(--gradient-brand)}
+.helm-progress--complete .helm-progress__track{box-shadow:0 0 0 1px var(--primary-border),0 6px 22px var(--glow-primary)}
+.helm-progress--complete .helm-progress__value{color:var(--primary-text)}

@@ -1,0 +1,57 @@
+/* Form controls */
+.helm-field{display:flex;flex-direction:column;gap:6px}
+.helm-field__label{font-size:var(--text-sm);font-weight:var(--weight-semibold);color:var(--text-strong);letter-spacing:var(--tracking-snug)}
+.helm-field__hint{font-size:var(--text-xs);color:var(--text-muted)}
+.helm-field__error{font-size:var(--text-xs);color:var(--danger-text);font-weight:var(--weight-medium)}
+
+.helm-input,.helm-textarea,.helm-select{font-family:var(--font-sans);font-size:var(--text-base);color:var(--text-strong);background:var(--surface);border:1px solid var(--border-strong);border-radius:var(--radius-md);width:100%;transition:border-color var(--dur-fast) var(--ease-standard),box-shadow var(--dur-fast) var(--ease-standard),background var(--dur-fast) var(--ease-standard)}
+.helm-input,.helm-select{height:40px;padding:0 12px}
+.helm-input::placeholder,.helm-textarea::placeholder{color:var(--text-faint)}
+.helm-input:hover,.helm-textarea:hover,.helm-select:hover{border-color:var(--text-faint)}
+.helm-input:focus,.helm-textarea:focus,.helm-select:focus{outline:none;border-color:var(--primary);box-shadow:var(--ring)}
+.helm-input:disabled,.helm-textarea:disabled,.helm-select:disabled{background:var(--surface-sunken);color:var(--text-faint);cursor:not-allowed;border-color:var(--border)}
+.helm-input--sm{height:32px;font-size:var(--text-sm);border-radius:var(--radius-sm);padding:0 10px}
+.helm-input--lg{height:48px;font-size:var(--text-lg)}
+.helm-input--invalid{border-color:var(--danger)}
+.helm-input--invalid:focus{box-shadow:var(--ring-danger)}
+.helm-textarea{padding:10px 12px;min-height:88px;line-height:var(--leading-normal);resize:vertical}
+.helm-input-wrap,.helm-select-wrap{position:relative;display:block}
+.helm-input-wrap__icon{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
+.helm-input--has-icon{padding-left:38px}
+.helm-select{appearance:none;-webkit-appearance:none;padding-right:38px;cursor:pointer}
+.helm-select-wrap__icon{position:absolute;right:12px;top:50%;transform:translateY(-50%);color:var(--text-muted);pointer-events:none}
+
+/* Checkbox — the hero moment */
+.helm-check{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;font-size:var(--text-base);color:var(--text-body);-webkit-tap-highlight-color:transparent}
+.helm-check--disabled{opacity:0.5;pointer-events:none}
+.helm-check__input{position:absolute;width:1px;height:1px;opacity:0;margin:0}
+.helm-check__box{position:relative;flex:none;width:22px;height:22px;border-radius:var(--radius-check);border:2px solid var(--border-strong);background:var(--surface);display:grid;place-items:center;color:var(--on-primary);transition:background var(--dur-fast) var(--ease-standard),border-color var(--dur-fast) var(--ease-standard),box-shadow var(--dur-fast) var(--ease-standard)}
+.helm-check__box svg{width:15px;height:15px}
+.helm-check__box svg path{stroke-dasharray:24;stroke-dashoffset:24;transition:stroke-dashoffset var(--dur) var(--ease-spring) 30ms}
+.helm-check:hover .helm-check__box{border-color:var(--primary)}
+.helm-check__input:focus-visible ~ .helm-check__box{box-shadow:var(--ring)}
+.helm-check__input:checked ~ .helm-check__box{background:var(--primary);border-color:var(--primary);animation:helm-check-pop var(--dur) var(--ease-spring)}
+.helm-check__input:checked ~ .helm-check__box svg path{stroke-dashoffset:0}
+.helm-check__input:disabled ~ .helm-check__box{background:var(--surface-sunken)}
+@keyframes helm-check-pop{0%{transform:scale(0.7)}55%{transform:scale(1.12)}100%{transform:scale(1)}}
+
+/* Radio */
+.helm-radio{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;font-size:var(--text-base);color:var(--text-body)}
+.helm-radio--disabled{opacity:0.5;pointer-events:none}
+.helm-radio__input{position:absolute;width:1px;height:1px;opacity:0;margin:0}
+.helm-radio__box{position:relative;flex:none;width:22px;height:22px;border-radius:50%;border:2px solid var(--border-strong);background:var(--surface);display:grid;place-items:center;transition:border-color var(--dur-fast) var(--ease-standard),box-shadow var(--dur-fast) var(--ease-standard)}
+.helm-radio__box::after{content:"";width:11px;height:11px;border-radius:50%;background:var(--primary);transform:scale(0);transition:transform var(--dur) var(--ease-spring)}
+.helm-radio:hover .helm-radio__box{border-color:var(--primary)}
+.helm-radio__input:focus-visible ~ .helm-radio__box{box-shadow:var(--ring)}
+.helm-radio__input:checked ~ .helm-radio__box{border-color:var(--primary)}
+.helm-radio__input:checked ~ .helm-radio__box::after{transform:scale(1)}
+
+/* Switch */
+.helm-switch{display:inline-flex;align-items:center;gap:10px;cursor:pointer;user-select:none;font-size:var(--text-base);color:var(--text-body)}
+.helm-switch--disabled{opacity:0.5;pointer-events:none}
+.helm-switch__input{position:absolute;width:1px;height:1px;opacity:0;margin:0}
+.helm-switch__track{position:relative;flex:none;width:44px;height:24px;border-radius:var(--radius-pill);background:var(--surface-active);transition:background var(--dur) var(--ease-standard),box-shadow var(--dur-fast) var(--ease-standard)}
+.helm-switch__thumb{position:absolute;top:3px;left:3px;width:18px;height:18px;border-radius:50%;background:#fff;box-shadow:var(--shadow-sm);transition:transform var(--dur) var(--ease-spring)}
+.helm-switch__input:focus-visible ~ .helm-switch__track{box-shadow:var(--ring)}
+.helm-switch__input:checked ~ .helm-switch__track{background:var(--primary)}
+.helm-switch__input:checked ~ .helm-switch__track .helm-switch__thumb{transform:translateX(20px)}

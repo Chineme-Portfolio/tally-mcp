@@ -30,9 +30,11 @@ Paste these into the matching fields on Claude Design's **"Set up your design sy
 
 ## Part 2 — In-repo prompt (run AFTER the export is committed)
 
-Once the Claude Design export is committed to this repo, run this in Claude Code so the agent reads the actual export instead of guessing. **Adjust the export path** to wherever you committed it.
+Once the Claude Design export is committed to this repo, run this in Claude Code so the agent reads the actual export instead of guessing. The export is committed at `design/`.
 
-> Read the Claude Design export in this repo (at `design/claude-design-export/` — adjust to the real path) and the context system in `context/`. Generate three files, each referencing `foundation.md` for the *why* and never restating it:
+> ✓ **Done (2026-07-22):** this prompt was executed — the UI trio (`context/ui-tokens.md`, `ui-rules.md`, `ui-registry.md`) is generated from the export and the README PENDING markers are dropped.
+
+> Read the Claude Design export in this repo (at `design/`) and the context system in `context/`. Generate three files, each referencing `foundation.md` for the *why* and never restating it:
 >
 > - `context/ui-tokens.md` — the raw tokens from the export: color, type scale, spacing, radius, and any others present. Values come from the export, not from assumption. Document the layered architecture: raw palette (private) → semantic aliases (the contract components code against) → framework binding. State the theming switches (e.g. `data-theme` for dark mode) and the invariant: **tokens only — no raw hex or off-palette values in components.**
 > - `context/ui-rules.md` — how those tokens compose into UI. Open with a §0 prime directive derived from Helm's brand voice in `foundation.md` (the one sentence every screen must serve), then usage rules, layout/spacing patterns, hierarchy, color discipline, do/don't, and required interaction states (checked/unchecked, dragging/reorder, empty, error). Note the embedded-in-Claude constraints: theme-aware, AA contrast, reduced-motion, self-contained.

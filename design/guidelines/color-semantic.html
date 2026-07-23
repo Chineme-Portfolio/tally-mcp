@@ -1,0 +1,26 @@
+<!-- @dsCard group="Colors" viewport="700x190" name="Semantic status" subtitle="Quiet support hues — green always leads" -->
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;background:var(--surface);padding:20px;font-family:var(--font-sans)}
+.grid{display:grid;grid-template-columns:repeat(4,1fr);gap:12px}
+.col{display:flex;flex-direction:column;gap:8px}
+.name{font-family:var(--font-mono);font-size:11px;letter-spacing:.04em;text-transform:uppercase;color:var(--text-faint)}
+.soft,.solid{border-radius:var(--radius-sm);padding:9px 11px;font-size:12px;font-weight:600}
+.solid{color:#fff}
+</style></head><body>
+<div class="grid">
+<div class="col"><span class="name">Done · success</span>
+<div class="soft" style="background:var(--success-surface);color:var(--success-text)">Ready to ship</div>
+<div class="solid" style="background:var(--success);color:var(--on-success)">Complete</div></div>
+<div class="col"><span class="name">Active · warning</span>
+<div class="soft" style="background:var(--warning-surface);color:var(--warning-text)">In progress</div>
+<div class="solid" style="background:var(--warning);color:var(--on-warning)">Attention</div></div>
+<div class="col"><span class="name">Blocked · danger</span>
+<div class="soft" style="background:var(--danger-surface);color:var(--danger-text)">Blocked</div>
+<div class="solid" style="background:var(--danger);color:var(--on-danger)">Failed</div></div>
+<div class="col"><span class="name">Neutral · info</span>
+<div class="soft" style="background:var(--info-surface);color:var(--info)">Not started</div>
+<div class="solid" style="background:var(--info);color:#fff">Note</div></div>
+</div>
+</body></html>

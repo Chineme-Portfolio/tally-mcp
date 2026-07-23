@@ -1,0 +1,15 @@
+/* Helm — Radius & border widths (confident, deliberate; never timid) */
+:root {
+  --radius-xs: 6px;
+  --radius-sm: 8px;
+  --radius-md: 12px;   /* confident default — buttons, inputs, chips */
+  --radius-lg: 16px;   /* cards, list rows */
+  --radius-xl: 22px;   /* dialogs, large containers */
+  --radius-2xl: 28px;
+  --radius-pill: 999px;
+  --radius-check: 7px; /* the hero checkbox */
+
+  --border-width: 1px;
+  --border-width-strong: 1.5px;
+  --border-width-heavy: 2px;
+}

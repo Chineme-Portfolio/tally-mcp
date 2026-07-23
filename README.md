@@ -14,19 +14,20 @@ Read the context system before writing any code. `context/foundation.md` is the 
 - `context/library-docs.md` — the stack as used here + approved dependencies
 - `context/build-graph.md` — dependency map (what depends on what)
 - `context/progress-log.md` — living build record; add an entry after any work
-- `context/ui-tokens.md` — design tokens **(PENDING: awaits Claude Design export)**
-- `context/ui-rules.md` — how tokens compose **(PENDING: awaits Claude Design export)**
-- `context/ui-registry.md` — component registry **(PENDING: awaits Claude Design export)**
+- `context/ui-tokens.md` — design tokens (copper + ink, type, spacing, motion) and the layered token system
+- `context/ui-rules.md` — how tokens compose into UI (voice, colour discipline, motion, interaction states)
+- `context/ui-registry.md` — the component registry; check it before building any component
+- `design/` — the Claude Design export: tokens, the `helm-*` component library, guidelines, and the launch-board UI kit (the design source of truth the trio points at)
 
 ## Reading order
-foundation → project-overview → architecture → code-standards → library-docs → build-graph → progress-log, then the UI trio once it exists.
+foundation → project-overview → architecture → code-standards → library-docs → build-graph → progress-log, then the UI trio (ui-tokens → ui-rules → ui-registry).
 
 ## If you're here to…
 | Need | Read |
 |---|---|
 | Understand what this is | `project-overview.md`, then `foundation.md` for the why |
 | Write any code | `code-standards.md` (every session) |
-| Build UI | the UI trio — check `ui-registry.md` before building any component **(PENDING)** |
+| Build UI | the UI trio (`ui-tokens.md` · `ui-rules.md`); check `ui-registry.md` before building any component |
 | Add a dependency | `library-docs.md` (and add it to the approved list first) |
 | Decide what to build next | `build-graph.md` |
 | See what exists already | `progress-log.md` |

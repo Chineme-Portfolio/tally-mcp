@@ -1,0 +1,58 @@
+<!-- @dsCard group="Board Widget" viewport="820x900" name="Launch-readiness board" subtitle="The MCP Apps widget, embedded in a generic chat host — check, add, reorder, ship" -->
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Helm · Launch-readiness board</title>
+<link rel="stylesheet" href="../../styles.css">
+<style>
+html,body{margin:0}
+.stage{min-height:100vh;background:var(--canvas);padding:36px 18px;display:flex;justify-content:center;align-items:flex-start}
+.host{width:100%;max-width:760px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow-lg);overflow:hidden}
+.host__bar{display:flex;align-items:center;gap:7px;padding:12px 16px;border-bottom:1px solid var(--border);background:var(--surface-sunken)}
+.host__dot{width:11px;height:11px;border-radius:50%;background:var(--border-strong)}
+.host__label{margin-left:8px;font-family:var(--font-mono);font-size:11px;letter-spacing:.03em;color:var(--text-muted)}
+.host__theme{margin-left:auto;display:inline-flex;align-items:center;gap:6px;font-family:var(--font-sans);font-size:12px;font-weight:600;color:var(--text-muted);background:transparent;border:1px solid var(--border);border-radius:var(--radius-pill);padding:5px 11px;cursor:pointer;transition:color var(--dur-fast),border-color var(--dur-fast)}
+.host__theme:hover{color:var(--text-strong);border-color:var(--text-faint)}
+.host__thread{padding:20px;display:flex;flex-direction:column;gap:16px;background:var(--canvas)}
+.msg--user{display:flex;justify-content:flex-end}
+.msg--user .bubble{background:var(--surface-active);color:var(--text-strong);padding:10px 14px;border-radius:16px 16px 4px 16px;font-size:14px;max-width:80%;line-height:1.45}
+.msg--assistant{display:flex;gap:12px;align-items:flex-start}
+.avatar{width:28px;height:28px;border-radius:9px;background:var(--surface-active);border:1px solid var(--border);flex:none;margin-top:2px}
+.assistant__body{flex:1;min-width:0}
+.assistant__say{font-size:14px;color:var(--text-body);margin:0 0 12px;line-height:1.5}
+
+.hw{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-xl);box-shadow:var(--shadow-md);overflow:hidden;color:var(--text-body)}
+.hw__head{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:15px 18px;border-bottom:1px solid var(--border)}
+.hw__brand{display:flex;align-items:center;gap:12px;min-width:0}
+.hw__mark{font-family:var(--font-display);font-weight:700;font-size:18px;letter-spacing:-.02em;color:var(--text-strong)}
+.hw__dot{color:var(--primary)}
+.hw__sep{width:1px;height:18px;background:var(--border-strong)}
+.hw__title{font-family:var(--font-display);font-weight:600;font-size:16px;color:var(--text-strong);letter-spacing:-.01em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hw__tools{display:flex;align-items:center;gap:4px;flex:none}
+.hw__meter{padding:18px 18px 8px}
+.hw__controls{padding:6px 18px 14px}
+.hw__list{padding:0 14px;display:flex;flex-direction:column;gap:8px}
+.hw__row{cursor:grab}
+.hw__row:active{cursor:grabbing}
+.hw__empty{padding:26px;text-align:center;color:var(--text-faint);font-size:14px}
+.hw__add{display:flex;gap:8px;padding:15px 18px 16px}
+.hw__add .helm-input-wrap{flex:1}
+.hw__foot{display:flex;align-items:center;justify-content:space-between;gap:12px;padding:14px 18px;border-top:1px solid var(--border);background:var(--surface-sunken)}
+.hw__count{font-size:13px;color:var(--text-muted);font-weight:500}
+</style>
+</head>
+<body>
+<div id="root"></div>
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="kit-ui.jsx"></script>
+<script type="text/babel" src="board-app.jsx"></script>
+<script type="text/babel">
+  const { App } = window;
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

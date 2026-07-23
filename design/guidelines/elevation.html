@@ -1,0 +1,18 @@
+<!-- @dsCard group="Shape" viewport="700x180" name="Elevation" subtitle="Soft layered shadows in light; border-led depth in dark" -->
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><link rel="stylesheet" href="../styles.css">
+<style>
+body{margin:0;background:var(--canvas);padding:26px 22px;font-family:var(--font-sans)}
+.row{display:flex;gap:20px;flex-wrap:wrap}
+.b{display:flex;flex-direction:column;align-items:center;gap:10px}
+.card{width:104px;height:66px;background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg)}
+.t{font-family:var(--font-mono);font-size:11px;color:var(--text-muted)}
+</style></head><body>
+<div class="row">
+<div class="b"><div class="card" style="box-shadow:var(--shadow-xs)"></div><span class="t">xs</span></div>
+<div class="b"><div class="card" style="box-shadow:var(--shadow-sm)"></div><span class="t">sm</span></div>
+<div class="b"><div class="card" style="box-shadow:var(--shadow-md)"></div><span class="t">md</span></div>
+<div class="b"><div class="card" style="box-shadow:var(--shadow-lg)"></div><span class="t">lg</span></div>
+<div class="b"><div class="card" style="box-shadow:var(--shadow-xl)"></div><span class="t">xl</span></div>
+</div>
+</body></html>
