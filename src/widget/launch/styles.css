@@ -1,0 +1,127 @@
+/* Helm launch board widget styles.
+
+   Pulls the design system tokens and component CSS straight from design/ (one
+   source of truth), then the board layout. The Google Fonts @import in
+   design/tokens/fonts.css is deliberately NOT included: the sandboxed iframe
+   cannot reach a CDN. Fonts are self hosted in ./fonts.css (base64) so the
+   brand type still ships; the token stacks fall back to the system font if a
+   face is missing. */
+@import "./fonts.css";
+@import "../../../design/tokens/colors.css";
+@import "../../../design/tokens/typography.css";
+@import "../../../design/tokens/spacing.css";
+@import "../../../design/tokens/radius.css";
+@import "../../../design/tokens/shadows.css";
+@import "../../../design/tokens/motion.css";
+@import "../../../design/base.css";
+@import "../../../design/css/components.css";
+
+/* Page: the widget sits on the canvas, centered, with breathing room. */
+body {
+  padding: 14px;
+  background: var(--canvas);
+}
+
+/* Board layout (from design/ui_kits/board/, the widget chrome). */
+.hw {
+  max-width: var(--widget-max);
+  margin: 0 auto;
+  background: var(--surface);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+  box-shadow: var(--shadow-md);
+  overflow: hidden;
+  color: var(--text-body);
+}
+.hw__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 15px 18px;
+  border-bottom: 1px solid var(--border);
+}
+.hw__brand {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+.hw__mark {
+  font-family: var(--font-display);
+  font-weight: 700;
+  font-size: 18px;
+  letter-spacing: -0.02em;
+  color: var(--text-strong);
+}
+.hw__dot {
+  color: var(--primary);
+}
+.hw__sep {
+  width: 1px;
+  height: 18px;
+  background: var(--border-strong);
+}
+.hw__title {
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--text-strong);
+  letter-spacing: -0.01em;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.hw__tools {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  flex: none;
+}
+.hw__meter {
+  padding: 18px 18px 8px;
+}
+.hw__controls {
+  padding: 6px 18px 14px;
+}
+.hw__list {
+  padding: 0 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.hw__row {
+  cursor: grab;
+}
+.hw__row:active {
+  cursor: grabbing;
+}
+.hw__empty {
+  padding: 26px;
+  text-align: center;
+  color: var(--text-faint);
+  font-size: 14px;
+}
+.hw__add {
+  display: flex;
+  gap: 8px;
+  padding: 15px 18px 16px;
+}
+.hw__add .helm-input-wrap,
+.hw__add .helm-input {
+  flex: 1;
+}
+.hw__foot {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 14px 18px;
+  border-top: 1px solid var(--border);
+  background: var(--surface-sunken);
+}
+.hw__count {
+  font-size: 13px;
+  color: var(--text-muted);
+  font-weight: 500;
+}

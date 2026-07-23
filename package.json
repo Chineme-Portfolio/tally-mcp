@@ -14,13 +14,19 @@
     "build": "npm run build:widget",
     "build:widget": "vite build --config vite.widget.config.ts",
     "typecheck": "tsc --noEmit",
+    "db:generate": "drizzle-kit generate",
+    "db:migrate": "drizzle-kit migrate",
+    "db:seed": "tsx src/server/db/seed.ts",
     "start": "tsx src/server/index.ts"
   },
   "dependencies": {
     "@modelcontextprotocol/ext-apps": "^1.7.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "cors": "^2.8.5",
+    "dotenv": "^17.4.2",
+    "drizzle-orm": "^0.45.2",
     "express": "^5.1.0",
+    "postgres": "^3.4.9",
     "react": "^19.2.0",
     "react-dom": "^19.2.0",
     "tsx": "^4.19.2",
@@ -34,6 +40,7 @@
     "@types/react-dom": "^19.2.2",
     "@vitejs/plugin-react": "^4.3.4",
     "concurrently": "^9.1.0",
+    "drizzle-kit": "^0.31.10",
     "typescript": "^5.9.3",
     "vite": "^6.0.0",
     "vite-plugin-singlefile": "^2.3.0"

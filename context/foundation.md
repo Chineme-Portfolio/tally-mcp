@@ -1,6 +1,6 @@
 # Helm — Foundation
 
-> **Status:** v2 — converged. Last updated 2026-07-22. Changes from v1: claude.ai rendering verified (both surfaces render third-party widgets); React, latest-versions, and codename `Helm` locked; item reordering added to v1 as the app-only `visibility:["app"]` showcase (`launch_item_reorder`), separate `prefs` tool deferred; §11 deepest risk reframed now that rendering is observed working.
+> **Status:** v3 — converged. Last updated 2026-07-23. Changes from v2: task state moved from a binary `done` to a **four-state `status`** (todo / active / blocked / done) with a readiness meter (§5, §7 #16); the tool surface refined accordingly (`launch_item_toggle` → `launch_item_set_status`, and `launch_status` now carries the structured board state the widget fetches on mount) (§6, §8); the two §12 build-time items resolved. Driven by spec `0002-launch-board`.
 > Source of truth. Every other file references this; none restate it. If any file disagrees with this one, this one wins.
 > Codename `Helm` is a placeholder until the name is locked — find-and-replace when it is.
 
@@ -50,9 +50,9 @@
 **Entities (v1):**
 - **`user`** — a single row in v1 (no auth), but the table and a `user_id` foreign key exist from day one so multi-tenant scoping is a later addition, not a rewrite. (§7 #6)
 - **`module`** — a registered capability. The launch board is module one. A lightweight **module registry** records what modules exist.
-- **`item`** — belongs to a board/module: `text`, `done` (bool), `position` (ordering — drives reorder), timestamps. The launch board is a collection of items.
+- **`item`** — belongs to a board/module: `title`, **`status`** (one of `todo` / `active` / `blocked` / `done`), `position` (ordering — drives reorder), timestamps. The launch board is a collection of items. **Readiness** = count(`done`) / count(all); an empty board reads 0%.
 
-**Item lifecycle:** `created → toggled done/undone ↔ edited ↔ reordered → deleted`. A board can be **reset** (clear or uncheck all).
+**Item lifecycle:** `created → status moves freely among todo / active / blocked / done ↔ edited ↔ reordered → deleted`. The checkbox toggles `done` ↔ `todo`; the status control sets `active` / `blocked`. A board can be **reset** (every item back to `todo`, keeping the items).
 
 **The extensibility unit — a "module" = four things, always together:**
 1. a **tool namespace prefix** (`launch_*` now, `pipeline_*` later),
@@ -67,7 +67,7 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 **Surface:** an MCP Apps widget rendered inline in the chat client. **Claude Desktop** is the primary demo bar (proven); **claude.ai** is now verified to render MCP Apps widgets as well (§7 #13).
 
 - **Flow A — render / jump-back:** user picks the `/launch-board` **prompt** (or just asks) → Claude calls `launch_board_show` **tool** → widget renders with current items. The prompt is the discoverable trigger; the tool does the work.
-- **Flow B — widget interaction:** user clicks / drags in the widget → widget calls the tools via `tools/call` (add / edit / toggle / delete / reset are model+app; **reorder is app-only**) → server persists → widget re-renders.
+- **Flow B — widget interaction:** user clicks / drags in the widget → widget calls the tools via `tools/call` (add / edit / set status / delete / reset are model+app; **reorder is app-only**) → server persists → widget re-renders.
 - **Flow C — Claude operates the board:** user tells Claude "add X" / "mark Y done" → Claude calls the *same* model+app tools → server persists.
 - **Flow D — Claude reasons about state:** Claude calls `launch_status` → reads current state as text/structured → discusses it in conversation ("4 of 7 done; blockers left are DNS and billing").
 
@@ -76,12 +76,12 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 | Tool | Visibility | Called by | Purpose |
 |---|---|---|---|
 | `launch_board_show` | model + app | user / Claude | render widget + current state (also the "jump-back" tool) |
-| `launch_status` | model + app | Claude | read state as text so Claude reasons in conversation |
+| `launch_status` | model + app | Claude + widget | the board read: structured `{ items, readiness }` (what the widget fetches on mount) plus a short text summary Claude reasons from |
 | `launch_item_add` | model + app | Claude + widget | add an item |
 | `launch_item_edit` | model + app | Claude + widget | edit item text |
-| `launch_item_toggle` | model + app | Claude + widget | check / uncheck |
+| `launch_item_set_status` | model + app | Claude + widget | set `todo` / `active` / `blocked` / `done` (the checkbox uses `done` ↔ `todo`) |
 | `launch_item_delete` | model + app | Claude + widget | delete an item |
-| `launch_board_reset` | model + app | Claude + widget | clear / uncheck all |
+| `launch_board_reset` | model + app | Claude + widget | set every item back to `todo` |
 | `launch_item_reorder` | **app** | widget only | persist drag-reorder — the deliberate `visibility:["app"]` showcase (§7 #11) |
 
 **Prompt:** `launch-board` — canned instruction ("show my launch-readiness board") that triggers `launch_board_show`. Discoverable in the client; advertises the capability to anyone who connects.
@@ -106,11 +106,12 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 | 13 | **Both Claude Desktop and claude.ai render MCP Apps widgets** (observed); Desktop is the primary demo bar | Empirically verified — a third-party widget rendered on claude.ai, and widgets render on Desktop | Assume only Desktop works (out of date), or block on claude.ai as a dependency |
 | 14 | **No standalone `security.md`** — security lives in `code-standards.md` | Low-sensitivity personal data; no third-party OAuth tokens, no health/financial data | Split out `security.md` (overkill for v1; revisit if multi-tenant) |
 | 15 | **Prove render first:** a Layer-0 "hello-world widget renders in a real client" spike gates feature work | De-risks §11 before time goes into features; now specifically proves *our* pipeline renders (not just third-party widgets) | Build features, discover rendering problems late |
+| 16 | Task state is a **four-state `status`** (todo / active / blocked / done) with a **readiness meter**, not a binary done | "Launch *readiness*" is the product's identity, and the design system already ships the `Status` pill and `ProgressBar` for exactly this; the cost is one enum column | Binary done/not-done (simpler, but drops the meter and the active/blocked vocabulary the design was built around) |
 
 ## §8 Scope
 
 ### In (v1)
-- The **launch-readiness board** module with **full CRUD + reordering** — add / edit / toggle / delete / reset (model+app) and drag-reorder (app-only) — operable from **both** the widget and Claude.
+- The **launch-readiness board** module with **full CRUD + four-state status + reordering** — add / edit / set status (todo / active / blocked / done) / delete / reset (model+app) and drag-reorder (app-only) — operable from **both** the widget and Claude, with a **readiness meter** (percent done).
 - `launch_board_show` render tool + `launch_status` read tool + the `launch-board` prompt.
 - Single-tenant persistence in Postgres (with `user_id` present but unenforced).
 - Deployed on Railway; a clean, public, **self-hostable** repo.
@@ -149,5 +150,7 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 ## §12 Open questions
 <!-- Convergence reached — no decisions are outstanding. Two items carried as build-time homework, neither blocking. -->
 
-1. **Pin exact package names + versions** for the core MCP SDK and `@modelcontextprotocol/ext-apps` in `library-docs.md`, verified against the live registry (ecosystem is <6 months old). *(Build-time; my task.)*
-2. **The Layer-0 spike must confirm *our own* widget renders** in a real client (§11) before feature work begins. *(Execution gate, not a decision.)*
+1. ~~Pin exact package names + versions for the core MCP SDK and `ext-apps`.~~ **Resolved** during the render spike: `ext-apps ^1.7.0`, `sdk ^1.29.0`, recorded in `library-docs.md`.
+2. ~~The Layer-0 spike must confirm *our own* widget renders in a real client.~~ **Resolved** 2026-07-22: the gate passed in Claude Desktop (render, round trip, and app-only enforcement); see `progress-log.md`.
+
+Nothing outstanding. Remaining **execution** items (not decisions) live in the specs: the Railway deploy (spec 0001 AC-5) and the launch board build (spec 0002).
