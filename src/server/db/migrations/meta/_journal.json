@@ -15,6 +15,13 @@
       "when": 1784904273312,
       "tag": "0001_bizarre_slapstick",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1784990000000,
+      "tag": "0002_board_model",
+      "breakpoints": true
     }
   ]
 }

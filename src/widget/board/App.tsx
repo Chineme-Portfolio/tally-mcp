@@ -1,38 +1,45 @@
 import { useApp } from "@modelcontextprotocol/ext-apps/react";
 import { useEffect, useRef, useState } from "react";
 import {
-  BoardState,
-  type LaunchItem,
-  type LaunchItemStatus,
-} from "../../shared/launch.js";
+  BoardMutation,
+  type BoardItem,
+  type BoardItemStatus,
+  type BoardSummary,
+  BoardView,
+  ShipResult,
+} from "../../shared/board.js";
 import {
   HBadge,
   HButton,
-  HCheck,
-  HIcon,
   HIconButton,
   HInput,
   HItem,
   HMenu,
   HProgress,
-  HStatus,
   HTabs,
 } from "./kit-ui.js";
 
 type Filter = "all" | "open" | "done";
 
-// Reads the board out of a tool result's structured content (the pull model:
-// the widget calls a tool, then reads the result).
-function readBoard(result: unknown): BoardState | null {
-  if (!result || typeof result !== "object") return null;
-  const parsed = BoardState.safeParse((result as { structuredContent?: unknown }).structuredContent);
-  return parsed.success ? parsed.data : null;
+// Reads a full board view (current board + tabs + items) out of a tool result's
+// structured content. Used for the mount fetch and any board level change.
+function readView(result: unknown): BoardView | null {
+  const sc = (result as { structuredContent?: unknown })?.structuredContent;
+  const p = BoardView.safeParse(sc);
+  return p.success ? p.data : null;
 }
 
-// Pulls the shipped item count out of a launch_board_ship result (its run key).
-function readShipCount(result: unknown): number {
-  const sc = (result as { structuredContent?: { run?: { itemCount?: number } } })?.structuredContent;
-  return sc?.run?.itemCount ?? 0;
+// Reads an item mutation result (the current board's new items, no tab set).
+function readMutation(result: unknown): BoardMutation | null {
+  const sc = (result as { structuredContent?: unknown })?.structuredContent;
+  const p = BoardMutation.safeParse(sc);
+  return p.success ? p.data : null;
+}
+
+function readShip(result: unknown): ShipResult | null {
+  const sc = (result as { structuredContent?: unknown })?.structuredContent;
+  const p = ShipResult.safeParse(sc);
+  return p.success ? p.data : null;
 }
 
 function initialTheme(): "light" | "dark" {
@@ -44,18 +51,25 @@ function initialTheme(): "light" | "dark" {
 
 export function App() {
   const { app, error } = useApp({
-    appInfo: { name: "Helm launch board", version: "0.1.0" },
+    appInfo: { name: "Tally board", version: "0.1.0" },
     capabilities: {},
   });
 
-  const [items, setItems] = useState<LaunchItem[]>([]);
+  // Board level state: every board (the tabs) and which one is current.
+  const [boards, setBoards] = useState<BoardSummary[]>([]);
+  const [currentId, setCurrentId] = useState<string | null>(null);
+  // Current board's items + readiness.
+  const [items, setItems] = useState<BoardItem[]>([]);
   const [readiness, setReadiness] = useState(0);
+
   const [ready, setReady] = useState(false);
   const [status, setStatus] = useState("connecting");
   const [filter, setFilter] = useState<Filter>("all");
   const [draft, setDraft] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
   const [editDraft, setEditDraft] = useState("");
+  const [addingBoard, setAddingBoard] = useState(false);
+  const [boardDraft, setBoardDraft] = useState("");
   const dragId = useRef<string | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [themeState, setThemeState] = useState<"light" | "dark">(initialTheme);
@@ -64,35 +78,68 @@ export function App() {
   const [shipped, setShipped] = useState(false);
   const confirmTimer = useRef<number | null>(null);
 
-  // Applies a board returned by any tool.
-  function apply(board: BoardState | null) {
-    if (!board) return;
-    setItems(board.items);
-    setReadiness(board.readiness);
+  const currentName = boards.find((b) => b.id === currentId)?.name ?? "";
+
+  // A board level result (mount, switch, create, rename, delete): replace the
+  // tab set, the current board, and its items wholesale.
+  function applyView(view: BoardView | null) {
+    if (!view) return;
+    setBoards(view.boards);
+    setCurrentId(view.board.id);
+    setItems(view.items);
+    setReadiness(view.readiness);
   }
 
-  // The tool call helper. Returns the board from the result, or null.
-  async function call(name: string, args: Record<string, unknown> = {}) {
+  // An item mutation result: update the current board's items, and refresh only
+  // the current tab's count and readiness from the same payload (so tabs never
+  // go stale, without shipping the whole tab set on every item write).
+  function applyMutation(m: BoardMutation | null) {
+    if (!m) return;
+    setItems(m.items);
+    setReadiness(m.readiness);
+    const done = m.items.filter((i) => i.status === "done").length;
+    setBoards((bs) =>
+      bs.map((b) =>
+        b.id === m.board.id
+          ? { ...b, itemCount: m.items.length, readiness: m.readiness, name: m.board.name }
+          : b,
+      ),
+    );
+    void done;
+  }
+
+  async function callView(name: string, args: Record<string, unknown> = {}) {
     if (!app) return null;
     try {
-      const result = await app.callServerTool({ name, arguments: args });
-      const board = readBoard(result);
-      apply(board);
-      return board;
+      const view = readView(await app.callServerTool({ name, arguments: args }));
+      applyView(view);
+      return view;
     } catch (e) {
       setStatus(`error: ${String(e)}`);
       return null;
     }
   }
 
-  // On mount: fetch the board (launch_status is the structured read).
+  async function callMutation(name: string, args: Record<string, unknown> = {}) {
+    if (!app) return null;
+    try {
+      const m = readMutation(await app.callServerTool({ name, arguments: args }));
+      applyMutation(m);
+      return m;
+    } catch (e) {
+      setStatus(`error: ${String(e)}`);
+      return null;
+    }
+  }
+
+  // On mount: fetch the current board and the tab set (board_status).
   useEffect(() => {
     if (!app) return;
     let cancelled = false;
     void (async () => {
-      const board = await call("launch_status");
+      const view = await callView("board_status");
       if (!cancelled) {
-        if (board) setReady(true);
+        if (view) setReady(true);
         setStatus("ready");
       }
     })();
@@ -108,38 +155,52 @@ export function App() {
     filter === "all" ? true : filter === "open" ? t.status !== "done" : t.status === "done",
   );
 
-  // If the board stops being complete mid-confirm (a task un-ticked between the
-  // two clicks), drop the confirm state so no button lingers below 100 percent.
   useEffect(() => {
     if (!complete && confirming) cancelConfirm();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [complete, confirming]);
 
-  function toggle(item: LaunchItem) {
-    void call("launch_item_set_status", {
+  // ---- Board switching / creating ----
+  function switchBoard(id: string) {
+    if (id === currentId) return;
+    const b = boards.find((x) => x.id === id);
+    if (b) void callView("board_switch", { name: b.name });
+  }
+  async function createBoard() {
+    const name = boardDraft.trim();
+    if (!name) return;
+    const view = await callView("board_create", { name });
+    if (view) {
+      setBoardDraft("");
+      setAddingBoard(false);
+    }
+  }
+
+  // ---- Item actions (on the current board) ----
+  function toggle(item: BoardItem) {
+    void callMutation("board_item_set_status", {
       id: item.id,
       status: item.status === "done" ? "todo" : "done",
     });
   }
-  function setItemStatus(id: string, next: LaunchItemStatus) {
-    void call("launch_item_set_status", { id, status: next });
+  function setItemStatus(id: string, next: BoardItemStatus) {
+    void callMutation("board_item_set_status", { id, status: next });
   }
   function remove(id: string) {
-    void call("launch_item_delete", { id });
+    void callMutation("board_item_delete", { id });
   }
   function add() {
     const title = draft.trim();
     if (!title) return;
     setDraft("");
-    void call("launch_item_add", { title });
+    void callMutation("board_item_add", { title });
   }
   function saveEdit(id: string) {
     const title = editDraft.trim();
     setEditingId(null);
-    if (title) void call("launch_item_edit", { id, title });
+    if (title) void callMutation("board_item_edit", { id, title });
   }
 
-  // Optimistic drag reorder in local state; persist on drop.
   function reorderLocal(overId: string) {
     const from = dragId.current;
     if (from == null || from === overId) return;
@@ -154,10 +215,10 @@ export function App() {
     });
   }
   function persistOrder() {
-    void call("launch_item_reorder", { orderedIds: items.map((t) => t.id) });
+    void callMutation("board_item_reorder", { orderedIds: items.map((t) => t.id) });
   }
 
-  // Ship: a two step confirm, then archive and clear.
+  // ---- Ship (two step confirm) ----
   function clearConfirmTimer() {
     if (confirmTimer.current !== null) {
       window.clearTimeout(confirmTimer.current);
@@ -174,16 +235,16 @@ export function App() {
     setConfirming(false);
   }
 
-  // Best effort: tell Claude the launch shipped. A host that does not support
+  // Best effort: tell Claude the board shipped. A host that does not support
   // messages, or rejects it, must never break or undo the ship.
-  async function tellClaude(count: number) {
+  async function tellClaude(name: string, count: number) {
     if (!app) return;
     try {
       if (!app.getHostCapabilities()?.message?.text) return;
       const noun = count === 1 ? "task" : "tasks";
       await app.sendMessage({
         role: "user",
-        content: [{ type: "text", text: `Shipped. ${count} ${noun} done, board's green.` }],
+        content: [{ type: "text", text: `Shipped "${name}". ${count} ${noun} done, board's clear.` }],
       });
     } catch {
       // swallow: the ship already committed
@@ -194,23 +255,30 @@ export function App() {
     if (!app || shipping) return;
     cancelConfirm();
     setShipping(true);
+    const name = currentName;
     try {
-      const result = await app.callServerTool({ name: "launch_board_ship", arguments: {} });
-      const board = readBoard(result);
-      const count = readShipCount(result);
-      if (board) {
-        apply(board);
+      const result = await app.callServerTool({ name: "board_ship", arguments: {} });
+      const parsed = readShip(result);
+      if (parsed) {
+        // board stays, now empty; refresh its tab too.
+        setItems(parsed.items);
+        setReadiness(parsed.readiness);
+        setBoards((bs) =>
+          bs.map((b) =>
+            b.id === parsed.board.id ? { ...b, itemCount: 0, readiness: 0 } : b,
+          ),
+        );
+        setShipped(true);
+        window.setTimeout(() => setShipped(false), 4000);
+        void tellClaude(parsed.board.name, parsed.run.itemCount);
       } else {
-        await call("launch_status"); // could not parse the result; reload the truth
+        await callView("board_status"); // could not parse; reload the truth
       }
-      setShipped(true);
-      window.setTimeout(() => setShipped(false), 4000);
-      void tellClaude(count);
     } catch (e) {
       // The server may have committed before the response was lost, so never
       // trust local state here; reload from the server.
       setStatus(`ship failed: ${String(e)}`);
-      await call("launch_status");
+      await callView("board_status");
     } finally {
       setShipping(false);
     }
@@ -220,9 +288,7 @@ export function App() {
     <div className="hw" data-theme={themeState}>
       <header className="hw__head">
         <div className="hw__brand">
-          <span className="hw__mark">Helm<span className="hw__dot">.</span></span>
-          <span className="hw__sep" />
-          <span className="hw__title">Launch readiness</span>
+          <span className="hw__mark">Tally<span className="hw__dot">.</span></span>
         </div>
         <div className="hw__tools">
           <HIconButton
@@ -234,11 +300,45 @@ export function App() {
           <HMenu
             label="Board menu"
             items={[
-              { label: "Reset board", icon: "database", onClick: () => void call("launch_board_reset") },
+              { label: "Reset board", icon: "database", onClick: () => void callMutation("board_reset") },
             ]}
           />
         </div>
       </header>
+
+      {/* Board switcher: a tab per board (current highlighted), plus a new board
+          affordance. Distinct from the All/Open/Done filter below the meter. */}
+      <div className="hw__boards">
+        {boards.length > 0 && (
+          <HTabs<string>
+            value={currentId ?? ""}
+            onChange={switchBoard}
+            tabs={boards.map((b) => ({ value: b.id, label: b.name, count: b.itemCount }))}
+          />
+        )}
+        {addingBoard ? (
+          <div className="hw__newboard">
+            <HInput
+              autoFocus
+              placeholder="Board name…"
+              value={boardDraft}
+              onChange={(e) => setBoardDraft(e.target.value)}
+              onKeyDown={(e) => {
+                if (e.key === "Enter") void createBoard();
+                if (e.key === "Escape") {
+                  setAddingBoard(false);
+                  setBoardDraft("");
+                }
+              }}
+            />
+            <HButton variant="tinted" size="sm" onClick={() => void createBoard()}>Add</HButton>
+          </div>
+        ) : (
+          <HButton variant="ghost" size="sm" iconLeft="plus" onClick={() => setAddingBoard(true)}>
+            New board
+          </HButton>
+        )}
+      </div>
 
       <div className="hw__meter">
         <HProgress
@@ -315,14 +415,14 @@ export function App() {
           </div>
         ))}
         {ready && shown.length === 0 && (
-          <div className="hw__empty">Nothing here yet. Add the first task and let's get moving.</div>
+          <div className="hw__empty">Nothing here yet. Add the first item and let's get moving.</div>
         )}
       </div>
 
       <div className="hw__add">
         <HInput
           iconLeft="plus"
-          placeholder="Add a task…"
+          placeholder="Add an item…"
           value={draft}
           onChange={(e) => setDraft(e.target.value)}
           onKeyDown={(e) => {
@@ -335,7 +435,7 @@ export function App() {
       <footer className="hw__foot">
         {shipped ? (
           <span className="hw__count">
-            <HBadge variant="success" icon="check">Shipped, board's green</HBadge>
+            <HBadge variant="success" icon="check">Shipped, board's clear</HBadge>
           </span>
         ) : complete ? (
           <>

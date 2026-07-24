@@ -1,11 +1,11 @@
-/* Helm launch board widget styles.
+/* Tally board widget styles.
 
    Pulls the design system tokens and component CSS straight from design/ (one
    source of truth), then the board layout. The Google Fonts @import in
    design/tokens/fonts.css is deliberately NOT included: the sandboxed iframe
    cannot reach a CDN. Fonts are self hosted in ./fonts.css (base64) so the
    brand type still ships; the token stacks fall back to the system font if a
-   face is missing. */
+   face is missing. (Design tokens keep the helm- prefix: internal, deferred.) */
 @import "./fonts.css";
 @import "../../../design/tokens/colors.css";
 @import "../../../design/tokens/typography.css";
@@ -57,27 +57,40 @@ body {
 .hw__dot {
   color: var(--primary);
 }
-.hw__sep {
-  width: 1px;
-  height: 18px;
-  background: var(--border-strong);
-}
-.hw__title {
-  font-family: var(--font-display);
-  font-weight: 600;
-  font-size: 16px;
-  color: var(--text-strong);
-  letter-spacing: -0.01em;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
 .hw__tools {
   display: flex;
   align-items: center;
   gap: 4px;
   flex: none;
 }
+
+/* Board switcher: a tab per board plus a new board affordance. It sits above
+   the meter with a sunken background, so it reads as the top level "which
+   board" control, distinct from the All/Open/Done filter pills below the
+   meter. */
+.hw__boards {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 14px 10px 18px;
+  border-bottom: 1px solid var(--border);
+  background: var(--surface-sunken);
+  overflow-x: auto;
+}
+.hw__boards .helm-tabs {
+  flex: none;
+}
+.hw__newboard {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  flex: none;
+}
+.hw__newboard .helm-input,
+.hw__newboard .helm-input-wrap {
+  width: 150px;
+}
+
 .hw__meter {
   padding: 18px 18px 8px;
 }
