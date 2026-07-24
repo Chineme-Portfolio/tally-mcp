@@ -20,6 +20,12 @@ Category one of: `feature` · `fix` · `refactor` · `chore` · `decision` · `d
 
 ## Entries
 
+### [chore] GitHub auto-deploy + widget ui:// cache-bust
+- **Date:** 2026-07-24
+- **Area:** infra
+- **What:** (1) Connected the Railway `tally` service source to the GitHub repo (`railway service source connect --repo Chineme-Portfolio/tally-mcp --branch main`), so **every push to `main` auto-builds and deploys** (no more manual `railway up`). Connecting triggered a fresh GitHub-sourced deploy (`e825bce1`, SUCCESS) that replaced the upload-based one. (2) The board widget's `ui://` resource uri now embeds a short sha256 of the built widget (`ui://board/app-<hash>.html`), computed once at process start (`resource.ts`), so the uri changes only when the widget changes, nudging the host to load the new widget instead of a cached one after a redeploy (the spec 0004 follow-up). Verified live: the deployed `board_show` resourceUri is `ui://board/app-b8871830.html`.
+- **Notes:** How a push now propagates to connected Claude clients: **server logic + DB migrations auto-apply on the redeploy** (data persists, migrations idempotent, so the migrate on each boot is a no-op once applied). The widget uri hash **reduces but may not always eliminate** a connector re-add for widget changes (Claude's cache was stubborn in testing). Tool-list changes (add/rename/remove a tool) can still need a reconnect. Side effect of auto-deploy: **any** push redeploys, including docs-only changes; consider Railway "watch paths" if that churn matters.
+
 ### [chore] Deployed Tally to Railway + pushed to GitHub (Chineme-Portfolio)
 - **Date:** 2026-07-24
 - **Area:** infra
