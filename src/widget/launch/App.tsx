@@ -6,6 +6,7 @@ import {
   type LaunchItemStatus,
 } from "../../shared/launch.js";
 import {
+  HBadge,
   HButton,
   HCheck,
   HIcon,
@@ -26,6 +27,12 @@ function readBoard(result: unknown): BoardState | null {
   if (!result || typeof result !== "object") return null;
   const parsed = BoardState.safeParse((result as { structuredContent?: unknown }).structuredContent);
   return parsed.success ? parsed.data : null;
+}
+
+// Pulls the shipped item count out of a launch_board_ship result (its run key).
+function readShipCount(result: unknown): number {
+  const sc = (result as { structuredContent?: { run?: { itemCount?: number } } })?.structuredContent;
+  return sc?.run?.itemCount ?? 0;
 }
 
 function initialTheme(): "light" | "dark" {
@@ -52,6 +59,10 @@ export function App() {
   const dragId = useRef<string | null>(null);
   const [dragging, setDragging] = useState<string | null>(null);
   const [themeState, setThemeState] = useState<"light" | "dark">(initialTheme);
+  const [confirming, setConfirming] = useState(false);
+  const [shipping, setShipping] = useState(false);
+  const [shipped, setShipped] = useState(false);
+  const confirmTimer = useRef<number | null>(null);
 
   // Applies a board returned by any tool.
   function apply(board: BoardState | null) {
@@ -97,6 +108,13 @@ export function App() {
     filter === "all" ? true : filter === "open" ? t.status !== "done" : t.status === "done",
   );
 
+  // If the board stops being complete mid-confirm (a task un-ticked between the
+  // two clicks), drop the confirm state so no button lingers below 100 percent.
+  useEffect(() => {
+    if (!complete && confirming) cancelConfirm();
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [complete, confirming]);
+
   function toggle(item: LaunchItem) {
     void call("launch_item_set_status", {
       id: item.id,
@@ -137,6 +155,65 @@ export function App() {
   }
   function persistOrder() {
     void call("launch_item_reorder", { orderedIds: items.map((t) => t.id) });
+  }
+
+  // Ship: a two step confirm, then archive and clear.
+  function clearConfirmTimer() {
+    if (confirmTimer.current !== null) {
+      window.clearTimeout(confirmTimer.current);
+      confirmTimer.current = null;
+    }
+  }
+  function startConfirm() {
+    setConfirming(true);
+    clearConfirmTimer();
+    confirmTimer.current = window.setTimeout(() => setConfirming(false), 5000);
+  }
+  function cancelConfirm() {
+    clearConfirmTimer();
+    setConfirming(false);
+  }
+
+  // Best effort: tell Claude the launch shipped. A host that does not support
+  // messages, or rejects it, must never break or undo the ship.
+  async function tellClaude(count: number) {
+    if (!app) return;
+    try {
+      if (!app.getHostCapabilities()?.message?.text) return;
+      const noun = count === 1 ? "task" : "tasks";
+      await app.sendMessage({
+        role: "user",
+        content: [{ type: "text", text: `Shipped. ${count} ${noun} done, board's green.` }],
+      });
+    } catch {
+      // swallow: the ship already committed
+    }
+  }
+
+  async function ship() {
+    if (!app || shipping) return;
+    cancelConfirm();
+    setShipping(true);
+    try {
+      const result = await app.callServerTool({ name: "launch_board_ship", arguments: {} });
+      const board = readBoard(result);
+      const count = readShipCount(result);
+      if (board) {
+        apply(board);
+      } else {
+        await call("launch_status"); // could not parse the result; reload the truth
+      }
+      setShipped(true);
+      window.setTimeout(() => setShipped(false), 4000);
+      void tellClaude(count);
+    } catch (e) {
+      // The server may have committed before the response was lost, so never
+      // trust local state here; reload from the server.
+      setStatus(`ship failed: ${String(e)}`);
+      await call("launch_status");
+    } finally {
+      setShipping(false);
+    }
   }
 
   return (
@@ -256,18 +333,34 @@ export function App() {
       </div>
 
       <footer className="hw__foot">
-        <span className="hw__count">
-          {error
-            ? "Could not reach the host"
-            : complete
-              ? "All tasks complete. Go for launch."
+        {shipped ? (
+          <span className="hw__count">
+            <HBadge variant="success" icon="check">Shipped, board's green</HBadge>
+          </span>
+        ) : complete ? (
+          <>
+            <span className="hw__count">
+              <HBadge variant="success" icon="rocket">Go for launch</HBadge>
+            </span>
+            <HButton
+              variant={confirming ? "danger" : "primary"}
+              iconLeft="rocket"
+              disabled={shipping}
+              onClick={() => (confirming ? void ship() : startConfirm())}
+              onBlur={cancelConfirm}
+            >
+              {shipping ? "Shipping…" : confirming ? "Confirm ship" : "Ship it"}
+            </HButton>
+          </>
+        ) : (
+          <span className="hw__count">
+            {error
+              ? "Could not reach the host"
               : items.length === 0
                 ? status
                 : `${items.length - done} to go before launch`}
-        </span>
-        <HButton variant="primary" iconLeft="rocket" disabled={!complete}>
-          {complete ? "Ship it" : "Not ready"}
-        </HButton>
+          </span>
+        )}
       </footer>
     </div>
   );

@@ -8,6 +8,13 @@
       "when": 1784829414899,
       "tag": "0000_faithful_swarm",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1784904273312,
+      "tag": "0001_bizarre_slapstick",
+      "breakpoints": true
     }
   ]
 }

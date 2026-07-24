@@ -9,6 +9,7 @@ import {
   AddInput,
   DeleteInput,
   EditInput,
+  HistoryInput,
   MoveInput,
   ReorderInput,
   SetStatusInput,
@@ -18,10 +19,12 @@ import {
   deleteItem,
   editItem,
   listBoard,
+  listRuns,
   moveItem,
   reorder,
   resetBoard,
   setStatus,
+  shipBoard,
 } from "./repo.js";
 import { LAUNCH_RESOURCE_URI, readLaunchWidgetHtml } from "./resource.js";
 
@@ -150,6 +153,35 @@ export function registerLaunch(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async () => toolResult(await resetBoard()),
+  );
+
+  // Ship the board (app only, spec 0003). It archives and empties the board, a
+  // human commitment, so the model cannot call it; the widget's button does.
+  registerAppTool(
+    server,
+    "launch_board_ship",
+    {
+      title: "Ship the launch",
+      description:
+        "Archives the finished board as a launch record and clears it for the next launch. Only allowed when every task is done.",
+      inputSchema: {},
+      _meta: { ui: { visibility: ["app"] } },
+    },
+    async () => toolResult(await shipBoard()),
+  );
+
+  // Read recent launches (model + app), so Claude can answer "what did I ship
+  // last time?". Reading history is fine for the model; only shipping is not.
+  registerAppTool(
+    server,
+    "launch_history",
+    {
+      title: "Recent launches",
+      description: "Returns recent shipped launches (date, task count, titles).",
+      inputSchema: HistoryInput.shape,
+      _meta: { ui: { visibility: ["model", "app"] } },
+    },
+    async (args) => toolResult(await listRuns(args.limit)),
   );
 
   // Move one task to a position (model+app). Claude's conversational reorder

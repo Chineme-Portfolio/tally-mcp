@@ -38,3 +38,23 @@ export const MoveInput = z.object({
   id: z.string().uuid(),
   position: z.number().int().nonnegative(),
 });
+
+// Ship + history (spec 0003).
+export const ShipRun = z.object({
+  id: z.string().uuid(),
+  shippedAt: z.string(),
+  itemCount: z.number().int(),
+});
+export type ShipRun = z.infer<typeof ShipRun>;
+
+export const HistoryInput = z.object({
+  limit: z.number().int().positive().max(20).optional(),
+});
+export const HistoryRun = z.object({
+  id: z.string().uuid(),
+  shippedAt: z.string(),
+  itemCount: z.number().int(),
+  titles: z.array(z.string()),
+});
+export const HistoryOutput = z.object({ runs: z.array(HistoryRun) });
+export type HistoryOutput = z.infer<typeof HistoryOutput>;

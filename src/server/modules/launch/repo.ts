@@ -1,12 +1,13 @@
-import { and, asc, eq } from "drizzle-orm";
+import { and, asc, desc, eq, inArray } from "drizzle-orm";
 import type {
   BoardState,
   BoardStateWithItem,
   LaunchItem,
   LaunchItemStatus,
+  ShipRun,
 } from "../../../shared/launch.js";
 import { db } from "../../db/client.js";
-import { launchItems, type LaunchItemRow } from "../../db/schema.js";
+import { launchItems, launchRuns, type LaunchItemRow } from "../../db/schema.js";
 import { resolveUserId } from "../../user.js";
 
 // All access to launch_items lives here, and EVERY query filters by
@@ -125,6 +126,76 @@ export async function reorder(orderedIds: string[]): Promise<BoardState> {
     }
   });
   return boardState();
+}
+
+// Ship the board (spec 0003, app only). The read, the "all done" check, the
+// snapshot insert, and the delete ALL happen inside ONE transaction, and the
+// delete targets only the snapshotted ids, so a task added at the same time is
+// either archived with the rest or left on the board, never silently lost
+// (the cross-check finding). Returns the archived run and the now empty board.
+export async function shipBoard(): Promise<{ run: ShipRun } & BoardState> {
+  const userId = resolveUserId();
+  const run = await db.transaction(async (tx) => {
+    const rows = await tx
+      .select()
+      .from(launchItems)
+      .where(eq(launchItems.userId, userId))
+      .orderBy(asc(launchItems.position), asc(launchItems.createdAt));
+    if (rows.length === 0) throw new Error("launch_board_ship: the board is empty");
+    if (!rows.every((r) => r.status === "done")) {
+      throw new Error("launch_board_ship: every task must be done to ship");
+    }
+    const snapshot = rows.map((r) => ({
+      title: r.title,
+      status: r.status,
+      position: r.position,
+    }));
+    const [inserted] = await tx
+      .insert(launchRuns)
+      .values({ userId, itemCount: rows.length, items: snapshot })
+      .returning({
+        id: launchRuns.id,
+        shippedAt: launchRuns.shippedAt,
+        itemCount: launchRuns.itemCount,
+      });
+    if (!inserted) throw new Error("launch_board_ship: snapshot insert returned no row");
+    await tx.delete(launchItems).where(
+      and(
+        eq(launchItems.userId, userId),
+        inArray(launchItems.id, rows.map((r) => r.id)),
+      ),
+    );
+    return inserted;
+  });
+  return {
+    run: { id: run.id, shippedAt: run.shippedAt.toISOString(), itemCount: run.itemCount },
+    items: [],
+    readiness: 0,
+  };
+}
+
+// Recent launches, scoped, newest first (spec 0003).
+export async function listRuns(
+  limit = 5,
+): Promise<{
+  runs: Array<{ id: string; shippedAt: string; itemCount: number; titles: string[] }>;
+}> {
+  const userId = resolveUserId();
+  const capped = Math.min(Math.max(Math.trunc(limit), 1), 20);
+  const rows = await db
+    .select()
+    .from(launchRuns)
+    .where(eq(launchRuns.userId, userId))
+    .orderBy(desc(launchRuns.shippedAt))
+    .limit(capped);
+  return {
+    runs: rows.map((r) => ({
+      id: r.id,
+      shippedAt: r.shippedAt.toISOString(),
+      itemCount: r.itemCount,
+      titles: r.items.map((i) => i.title),
+    })),
+  };
 }
 
 // Move one task to a target position (0 is the top). This is Claude's

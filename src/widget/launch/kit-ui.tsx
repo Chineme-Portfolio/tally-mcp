@@ -225,6 +225,23 @@ export function HStatus({
   );
 }
 
+export function HBadge({
+  children,
+  variant = "neutral",
+  icon,
+}: {
+  children: ReactNode;
+  variant?: "neutral" | "success" | "warning" | "danger" | "info";
+  icon?: IconName;
+}) {
+  return (
+    <span className={"helm-badge helm-badge--" + variant}>
+      {icon && <HIcon name={icon} size={12} />}
+      {children}
+    </span>
+  );
+}
+
 export function HTabs<T extends string>({
   tabs,
   value,

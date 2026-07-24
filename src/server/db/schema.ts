@@ -2,6 +2,7 @@ import { sql } from "drizzle-orm";
 import {
   index,
   integer,
+  jsonb,
   pgEnum,
   pgTable,
   text,
@@ -69,3 +70,31 @@ export const launchItems = pgTable(
 );
 
 export type LaunchItemRow = typeof launchItems.$inferSelect;
+
+// A shipped launch, archived (spec 0003). Immutable: the app never updates or
+// deletes a row. `items` is a jsonb snapshot of the board at ship time.
+export const launchRuns = pgTable(
+  "launch_runs",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    userId: uuid("user_id")
+      .notNull()
+      .references(() => users.id, { onDelete: "cascade" }),
+    shippedAt: timestamp("shipped_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    itemCount: integer("item_count").notNull(),
+    items: jsonb("items")
+      .notNull()
+      .$type<
+        Array<{
+          title: string;
+          status: "todo" | "active" | "blocked" | "done";
+          position: number;
+        }>
+      >(),
+  },
+  (t) => [index("launch_runs_user_id_idx").on(t.userId)],
+);
+
+export type LaunchRunRow = typeof launchRuns.$inferSelect;

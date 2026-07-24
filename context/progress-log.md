@@ -20,6 +20,14 @@ Category one of: `feature` · `fix` · `refactor` · `chore` · `decision` · `d
 
 ## Entries
 
+### [feature] Ship action built (spec 0003), server side and build verified
+- **Date:** 2026-07-24
+- **Area:** server, widget, shared, db
+- **What:** Built the ship action per spec 0003 (Tracer Bullet). (1) `launch_runs` table (jsonb snapshot) + migration. (2) `shipBoard()` — the read, the "all done" check, the snapshot insert, and the delete of **only the snapshotted ids**, all inside **one transaction** (the cross check's TOCTOU fix); `listRuns()`; shared Zod schemas (`ShipRun`, `HistoryInput`/`HistoryOutput`). (3) `launch_board_ship` (app only) + `launch_history` (model+app) tools. (4) `HBadge` ported into `kit-ui.tsx`; footer reworked — below 100 percent: the count only, **no button** (the dead control is gone); at 100 percent: a "Go for launch" badge + an active "Ship it" button. (5) A two step confirm (5 second timer, blur, and a reset if the board stops being complete), a transient "Shipped" confirmation, and a failure path that reloads via `launch_status`. (6) `tellClaude()` posts a best effort message via `app.sendMessage`, guarded by `getHostCapabilities()?.message?.text`.
+- **Verified (code + runtime):** `tsc --noEmit` clean; migration applied and `launch_runs` live; end to end tool test against Postgres — **11 tools** with correct visibility (ship app only, history model+app), ship refuses an undone board **and** an empty board (both `isError`), a complete board ships (run `itemCount` 4, board emptied, readiness 0), `launch_history` reads it back; the live board was captured, restored exactly, and the test run deleted, so nothing of the user's was lost. Widget builds to one self contained file; the browser pane confirms **AC-1** (no ship button below 100 percent).
+- **Pending (human in the loop, Claude Desktop):** the 100 percent badge + "Ship it" button, the two step confirm, the "Shipped" confirmation, `app.sendMessage` posting a message to Claude, Claude unable to ship, and Claude reading history. The board is currently all done, so ship can be tested immediately. Spec 0003 status stays `In Progress`.
+- **Notes:** reconnect the Claude Desktop connector to pick up `launch_history` (model visible) and the new widget. `launch_board_ship` is app only, so the model never sees it (correct). The message posts as a *user* message and the host may deliver it on the next turn.
+
 ### [decision] Ship action designed, spec 0003 accepted; foundation to v5
 - **Date:** 2026-07-23
 - **Area:** context, docs/specs
