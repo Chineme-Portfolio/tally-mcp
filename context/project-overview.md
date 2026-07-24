@@ -1,10 +1,10 @@
-# Helm — Project Overview
+# Tally — Project Overview
 
 > This file **summarizes**. `foundation.md` is the complete, authoritative source — read it for the full reasoning behind every decision below. If this file and `foundation.md` ever disagree, `foundation.md` wins.
 
 ## About the project
 
-Helm is a personal **MCP server** built on the **MCP Apps standard** (SEP-1865). Instead of returning plain text, its tools return an **interactive widget** that renders inline in the chat client (Claude Desktop, claude.ai). Module one is a **launch-readiness board**: a checklist you and Claude can create, check off, edit, delete, and reorder, backed by a real Postgres database. It's both a working personal tool and a portfolio piece proving fluency on the first official MCP extension — and it's deliberately built as *module one of a larger command surface*, not a one-off.
+Tally is a personal **MCP server** built on the **MCP Apps standard** (SEP-1865). Instead of returning plain text, its tools return an **interactive widget** that renders inline in the chat client (Claude Desktop, claude.ai). Module one is a **launch-readiness board**: a checklist you and Claude can create, check off, edit, delete, and reorder, backed by a real Postgres database. It's both a working personal tool and a portfolio piece proving fluency on the first official MCP extension — and it's deliberately built as *module one of a larger command surface*, not a one-off.
 
 ## The problem it solves
 

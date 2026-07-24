@@ -1,6 +1,6 @@
-# Helm — UI Tokens
+# Tally — UI Tokens
 
-> The design tokens Helm's UI is built from, and the layered system they follow. Generated from the Claude Design export committed at `design/`. For *why* the product is bold and copper-led, see `foundation.md`; for how tokens compose into UI, see `ui-rules.md`; for coding conventions, see `code-standards.md` §7. If this file and `foundation.md` disagree, `foundation.md` wins.
+> The design tokens Tally's UI is built from, and the layered system they follow. Generated from the Claude Design export committed at `design/`. For *why* the product is bold and copper-led, see `foundation.md`; for how tokens compose into UI, see `ui-rules.md`; for coding conventions, see `code-standards.md` §7. If this file and `foundation.md` disagree, `foundation.md` wins.
 >
 > **Source of truth for exact values: `design/tokens/*.css` + `design/base.css`** (the compiled export). This doc explains the architecture and the contract and captures the key values; if a value here ever differs from that CSS, the CSS wins.
 
@@ -31,7 +31,7 @@ These are what you reference; they resolve differently per theme (exact values i
 - **Signature effects:** `--glow-primary`, `--glow-complete` (the completion moment), `--gradient-brand`, `--gradient-brand-soft`, `--grid-line`.
 
 ## Theming (light + dark, host-aware)
-Helm is theme-aware because the widget lives inside Claude's chat.
+Tally is theme-aware because the widget lives inside Claude's chat.
 - **Light** is the default on `:root` and `[data-theme="light"]`.
 - **Dark** applies on `[data-theme="dark"]` and via `@media (prefers-color-scheme: dark)` — unless a host forces `[data-theme="light"]` (defined after the media query, equal specificity, later wins).
 - Themes can be scoped to a **nested region**, so a dark widget can sit inside a light page.
@@ -59,7 +59,7 @@ Helm is theme-aware because the widget lives inside Claude's chat.
 - Eases: `--ease-standard` (most transitions), `--ease-out`, `--ease-in`, `--ease-spring` (overshoot: check/reorder), `--ease-spring-lg` (bigger pop: complete).
 - **All durations collapse to 0 and springs fall back to standard under `prefers-reduced-motion`** (in both `motion.css` and `base.css`). Never override that.
 
-## Consuming tokens in the Helm widget (required adaptations)
+## Consuming tokens in the Tally widget (required adaptations)
 The widget is a `vite-singlefile` bundle inside a sandboxed iframe with a strict CSP and no external network. So:
 1. **Inline the token CSS.** Import `design/styles.css` (or just the token files) into the widget so `vite-singlefile` inlines it, then reference `var(--token)` everywhere.
 2. **Fonts will NOT load from the CDN.** `design/tokens/fonts.css` is a Google Fonts `@import`, which is blocked in the iframe. Either **self-host** the `.woff2` files (add `@font-face` rules and bundle the fonts) to keep Space Grotesk / Hanken Grotesk / JetBrains Mono, or **accept the system fallbacks** already in each font stack (`ui-sans-serif, system-ui, …`). Decide this when building the launch board widget and record it in `progress-log.md`. Do not let the brand type silently fall back if it matters for the portfolio.

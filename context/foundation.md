@@ -1,8 +1,8 @@
-# Helm — Foundation
+# Tally — Foundation
 
-> **Status:** v5 — converged. Last updated 2026-07-23. Changes from v4: the **ship action** is decided (spec `0003-ship-action`, accepted, not yet built) — `launch_board_ship` is **app-only** and archives the finished board to a `launch_runs` record before clearing it, while `launch_history` (model+app) lets Claude read past launches (§6, §7 #17). (v4: added `launch_item_move` so Claude can reorder in conversation, with `launch_item_reorder` staying app-only for the drag; v3: binary `done` → a four-state `status` with a readiness meter; v2: rendering verified on both surfaces.)
+> **Status:** v6 — converged. Last updated 2026-07-24. Changes from v5: the **product name is locked** — codename `Helm` → **Tally** (§7 #18); the mechanical find-and-replace across the rest of the repo rolls out with spec `0004` and the deploy. (v5: the ship action — `launch_board_ship` app-only, archives to `launch_runs`, `launch_history` model+app; v4: `launch_item_move`; v3: four-state `status` + readiness meter; v2: rendering verified on both surfaces.)
 > Source of truth. Every other file references this; none restate it. If any file disagrees with this one, this one wins.
-> Codename `Helm` is a placeholder until the name is locked — find-and-replace when it is.
+> **Name:** locked to **Tally** on 2026-07-24 (§7 #18). Internal design tokens still carry the `helm-` prefix (and components the `H*` prefix) until the design rename pass — a deliberate, documented lag, not drift.
 
 **Status key:** ✅ locked · 🕗 TBD (decide later) · ⬜ planned · 🟡 in progress · **[LOCKED]** settled decision · ⏳ external lead time
 
@@ -20,7 +20,7 @@
 
 ## §1 What it is
 
-**Helm is a personal MCP server, built on the MCP Apps standard, that returns interactive widgets which render inline in the chat client — not just text.** Module one is a **launch-readiness board**: a checklist you (and Claude) can create, check off, edit, delete, and reorder, rendered as a widget you click, with state persisted in a real backend.
+**Tally is a personal MCP server, built on the MCP Apps standard, that returns interactive widgets which render inline in the chat client — not just text.** Module one is a **launch-readiness board**: a checklist you (and Claude) can create, check off, edit, delete, and reorder, rendered as a widget you click, with state persisted in a real backend.
 
 **The wedge / why it wins:** it's simultaneously (a) a genuinely useful *personal tool* and (b) a *portfolio proof* on the **first official MCP extension** (SEP-1865, shipped 2026-01-26) — being early on a standard with few polished examples is the whole value — and (c) architected as **module one of a multi-module "command surface,"** so it demonstrates system design, not just a toy.
 
@@ -111,6 +111,7 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 | 15 | **Prove render first:** a Layer-0 "hello-world widget renders in a real client" spike gates feature work | De-risks §11 before time goes into features; now specifically proves *our* pipeline renders (not just third-party widgets) | Build features, discover rendering problems late |
 | 16 | Task state is a **four-state `status`** (todo / active / blocked / done) with a **readiness meter**, not a binary done | "Launch *readiness*" is the product's identity, and the design system already ships the `Status` pill and `ProgressBar` for exactly this; the cost is one enum column | Binary done/not-done (simpler, but drops the meter and the active/blocked vocabulary the design was built around) |
 | 17 | **Shipping is app-only** (`launch_board_ship`): it archives the finished board as a `launch_runs` record, then clears it | Shipping is a commitment that empties the board — the one action where a wrong model call costs real work. The archive means nothing is destroyed, but recovery is manual, so the human commits it. Deliberately reverses #10 for this one action; Claude still *reads* past launches via `launch_history` (model+app) | Model+app ship (consistent with #10, but lets the model empty your board); reuse `reset` (loses the launch record entirely, and makes ship and reset the same action) |
+| 18 | **Product name is `Tally`** (codename `Helm` retired 2026-07-24) | A checklist-vibe name that keeps the clash *out of developer space*: `Helm` collides head-on with Kubernetes Helm, a top CNCF tool — the wrong association for a portfolio piece whose audience is developers. `Tally`'s collisions are product-space (the `tally.so` form builder, Tally accounting), not dev libraries, so a developer won't take it for a tool they'd `npm install`. `tally-mcp` is unclaimed on npm (reserved as the publish name). Checks run 2026-07-24. | Keep `Helm` (the Kubernetes-Helm dev clash we're leaving); `Slate` (repeats the mistake — collides with Slate.js *and* the Slate API-docs generator); `Wheelhouse` (degrades to "wheely") |
 
 ## §8 Scope
 

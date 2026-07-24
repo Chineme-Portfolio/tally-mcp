@@ -1,10 +1,10 @@
-# Helm — Context System
+# Tally — Context System
 
 <!-- Lives at the REPO ROOT — the front door. The context files themselves live in context/. -->
 
 Read the context system before writing any code. `context/foundation.md` is the source of truth; everything else references it.
 
-**Helm** is a personal MCP server on the MCP Apps standard: its tools return an interactive widget that renders inline in the chat client. Module one is a launch-readiness board. See `context/project-overview.md` for the plain-English tour.
+**Tally** is a personal MCP server on the MCP Apps standard: its tools return an interactive widget that renders inline in the chat client. Module one is a launch-readiness board. See `context/project-overview.md` for the plain-English tour.
 
 ## Files
 - `context/foundation.md` — every locked decision, with reasoning (start here)

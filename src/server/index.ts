@@ -23,5 +23,5 @@ app.all("/mcp", async (req, res) => {
 });
 
 app.listen(env.PORT, () => {
-  console.log(`[helm] MCP server listening on http://localhost:${env.PORT}/mcp`);
+  console.log(`[tally] MCP server listening on http://localhost:${env.PORT}/mcp`);
 });

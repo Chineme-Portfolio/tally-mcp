@@ -1,4 +1,4 @@
-# Helm — Agent context
+# Tally — Agent context
 
 > Front door for AI agents. Durable decisions live in `context/` (built by context-system).
 > This file routes you there and states the rules that never bend.

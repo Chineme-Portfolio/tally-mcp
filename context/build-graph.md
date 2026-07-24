@@ -1,4 +1,4 @@
-# Helm — Build Graph
+# Tally — Build Graph
 
 > A dependency map, not a plan. What depends on what. For *why*, see `foundation.md`; for *how the pieces fit*, `architecture.md`; for *what's been built*, `progress-log.md`.
 

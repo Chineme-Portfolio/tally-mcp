@@ -1,6 +1,6 @@
-# Helm — UI Registry
+# Tally — UI Registry
 
-> The components Helm's UI is built from, their build status **in our widget code**, and where each is designed. Check this registry before building any UI: reuse if built, port from the export if planned, and if it is not here it is not designed yet. For *how* each should look and behave see `ui-rules.md`; for tokens see `ui-tokens.md`. `foundation.md` wins on conflict.
+> The components Tally's UI is built from, their build status **in our widget code**, and where each is designed. Check this registry before building any UI: reuse if built, port from the export if planned, and if it is not here it is not designed yet. For *how* each should look and behave see `ui-rules.md`; for tokens see `ui-tokens.md`. `foundation.md` wins on conflict.
 > Designed components live in the Claude Design export at `design/` — each ships a `.jsx`, a `.d.ts` (props contract), and a `.prompt.md` (what/when + example).
 
 **Status legend:** ⬜ planned (designed in `design/`, not yet in our widget) · 🟡 in progress · ✅ built (ported into `src/widget/…`)

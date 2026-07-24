@@ -1,6 +1,6 @@
-# Helm — UI Rules
+# Tally — UI Rules
 
-> How Helm's tokens compose into UI. Read alongside `ui-tokens.md` (the values) and `ui-registry.md` (the components). For *why* the product is bold and copper-led, see `foundation.md`; for code conventions, see `code-standards.md` §7. If this file and `foundation.md` disagree, `foundation.md` wins.
+> How Tally's tokens compose into UI. Read alongside `ui-tokens.md` (the values) and `ui-registry.md` (the components). For *why* the product is bold and copper-led, see `foundation.md`; for code conventions, see `code-standards.md` §7. If this file and `foundation.md` disagree, `foundation.md` wins.
 > Source: the Claude Design export at `design/` (`design/readme.md` and `design/guidelines/`).
 
 ## §0 Prime directive

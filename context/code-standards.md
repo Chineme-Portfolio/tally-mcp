@@ -1,4 +1,4 @@
-# Helm — Code Standards
+# Tally — Code Standards
 
 > Implementation law: how the code is written, read top-to-bottom every session. For *what* is being built see `project-overview.md`; for *why* see `foundation.md` — which wins if this file ever disagrees. Libraries live in `library-docs.md`.
 >
@@ -29,7 +29,7 @@ Single package, but the internal seams are real and enforced by discipline (`arc
 
 ## §4 MCP Apps conventions (the framework's structure is yours to impose)
 
-The MCP SDK is unopinionated about *your* structure — so these are the rules that give Helm its shape:
+The MCP SDK is unopinionated about *your* structure — so these are the rules that give Tally its shape:
 
 - **Every tool validates its input with a Zod schema from `shared/`.** *Why:* tool arguments arrive from the model or the widget — untrusted. Validate at the boundary; inside the handler you then have a fully-typed, trusted object.
 - **Handlers are thin.** A tool handler validates input, calls a `repo`/service function, and shapes the result. No SQL, no business logic inline. *Why:* thin handlers are testable and the logic is reusable across tools.

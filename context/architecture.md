@@ -1,4 +1,4 @@
-# Helm — Architecture
+# Tally — Architecture
 
 > How the pieces fit. For *why* any choice was made, see `foundation.md` (cite decision numbers) — it wins if this file ever disagrees. Conventions live in `code-standards.md`; dependencies in `library-docs.md`.
 
@@ -9,7 +9,7 @@
         │   MCP over streamable HTTP
         ▼
 ┌─────────────────────────────────────────────────────────┐
-│  Helm MCP server        (Node + TypeScript, on Railway)  │
+│  Tally MCP server       (Node + TypeScript, on Railway)  │
 │                                                          │
 │  MCP layer      @modelcontextprotocol/sdk + ext-apps     │
 │   ├─ tools      launch_* handlers (Zod-validated)        │

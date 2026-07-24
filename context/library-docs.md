@@ -1,4 +1,4 @@
-# Helm — Library Docs
+# Tally — Library Docs
 
 > Each dependency and how *this project* uses it. Conventions live in `code-standards.md`; the reasoning behind each stack choice lives in `foundation.md` §7.
 >

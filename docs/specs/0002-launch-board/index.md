@@ -11,7 +11,7 @@ Build module one for real: a launch readiness board that renders as the designed
 
 **User stories**:
 - As the builder, I want a launch readiness board that I and Claude can fill with tasks, move through four states, reorder, and reset, rendered as a widget inside Claude, so I can see what is left before a launch and have Claude reason about it in conversation.
-- As a developer who self hosts Helm, I want the board state to persist in Postgres so it survives reloads and restarts.
+- As a developer who self hosts Tally, I want the board state to persist in Postgres so it survives reloads and restarts.
 
 **Acceptance criteria**:
 - **AC-1**: Invoking the board (the `launch-board` prompt, or `launch_board_show`) renders the designed board widget inline in Claude, showing every task and a readiness meter (percent done).
