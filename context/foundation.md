@@ -1,6 +1,6 @@
 # Helm — Foundation
 
-> **Status:** v4 — converged. Last updated 2026-07-23. Changes from v3: added **`launch_item_move`** (model + app) so Claude can reorder the board in conversation ("move X to the top"), after real use showed reordering is a genuine thing Claude should do; `launch_item_reorder` stays **app only** for the drag (it takes the whole new order a drag produces), so the app/model split is kept and made sharper (§6, §7 #11). (v3: binary `done` → a **four-state `status`** with a readiness meter, and `launch_item_toggle` → `launch_item_set_status` with `launch_status` carrying the structured board state; v2: rendering verified on both surfaces. Driven by spec `0002-launch-board`.)
+> **Status:** v5 — converged. Last updated 2026-07-23. Changes from v4: the **ship action** is decided (spec `0003-ship-action`, accepted, not yet built) — `launch_board_ship` is **app-only** and archives the finished board to a `launch_runs` record before clearing it, while `launch_history` (model+app) lets Claude read past launches (§6, §7 #17). (v4: added `launch_item_move` so Claude can reorder in conversation, with `launch_item_reorder` staying app-only for the drag; v3: binary `done` → a four-state `status` with a readiness meter; v2: rendering verified on both surfaces.)
 > Source of truth. Every other file references this; none restate it. If any file disagrees with this one, this one wins.
 > Codename `Helm` is a placeholder until the name is locked — find-and-replace when it is.
 
@@ -84,6 +84,8 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 | `launch_board_reset` | model + app | Claude + widget | set every item back to `todo` |
 | `launch_item_move` | model + app | Claude + widget | move one item to a position (Claude's conversational reorder: "move X to the top") |
 | `launch_item_reorder` | **app** | widget only | persist a drag-reorder (the whole new order a drag produces) — the deliberate `visibility:["app"]` showcase (§7 #11) |
+| `launch_board_ship` ⬜ | **app** | widget only | archive the finished board as a launch record, then clear it (§7 #17; spec 0003, planned) |
+| `launch_history` ⬜ | model + app | Claude | read recent launches ("what did I ship last time?") (spec 0003, planned) |
 
 **Prompt:** `launch-board` — canned instruction ("show my launch-readiness board") that triggers `launch_board_show`. Discoverable in the client; advertises the capability to anyone who connects.
 
@@ -108,6 +110,7 @@ This is the keystone (§9). Module two ships by adding these four, touching noth
 | 14 | **No standalone `security.md`** — security lives in `code-standards.md` | Low-sensitivity personal data; no third-party OAuth tokens, no health/financial data | Split out `security.md` (overkill for v1; revisit if multi-tenant) |
 | 15 | **Prove render first:** a Layer-0 "hello-world widget renders in a real client" spike gates feature work | De-risks §11 before time goes into features; now specifically proves *our* pipeline renders (not just third-party widgets) | Build features, discover rendering problems late |
 | 16 | Task state is a **four-state `status`** (todo / active / blocked / done) with a **readiness meter**, not a binary done | "Launch *readiness*" is the product's identity, and the design system already ships the `Status` pill and `ProgressBar` for exactly this; the cost is one enum column | Binary done/not-done (simpler, but drops the meter and the active/blocked vocabulary the design was built around) |
+| 17 | **Shipping is app-only** (`launch_board_ship`): it archives the finished board as a `launch_runs` record, then clears it | Shipping is a commitment that empties the board — the one action where a wrong model call costs real work. The archive means nothing is destroyed, but recovery is manual, so the human commits it. Deliberately reverses #10 for this one action; Claude still *reads* past launches via `launch_history` (model+app) | Model+app ship (consistent with #10, but lets the model empty your board); reuse `reset` (loses the launch record entirely, and makes ship and reset the same action) |
 
 ## §8 Scope
 

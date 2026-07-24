@@ -20,6 +20,12 @@ Category one of: `feature` · `fix` · `refactor` · `chore` · `decision` · `d
 
 ## Entries
 
+### [decision] Ship action designed, spec 0003 accepted; foundation to v5
+- **Date:** 2026-07-23
+- **Area:** context, docs/specs
+- **What:** Ran /architect on the "Ship it" button, which spec 0002 shipped as a dead control (its AC-11 deferred the real action). Wrote and accepted `docs/specs/0003-ship-action.md`. Decision: `launch_board_ship` is **app only** — it archives the finished board to a new `launch_runs` table (jsonb snapshot) and clears it, all inside one transaction — while `launch_history` (model+app) lets Claude read past launches. The widget gets a "Go for launch" badge, no button at all below 100 percent, an inline two step confirm, a transient "Shipped" confirmation, and posts a message to Claude via **`app.sendMessage`** (the `ui/message` primitive, a third MCP Apps capability for this project). Engineer decisions: button only ship, clears the board, Claude can read history, inline two step confirm.
+- **Notes:** Cross checked on Sonnet, which found a **genuine data loss bug**: the draft validated and read the items *outside* the transaction and deleted with a blanket `where user_id`, so a task added mid ship would be silently destroyed without ever being snapshotted. Fixed: read, check, insert, and delete all inside one transaction, deleting **only the snapshotted ids**. Five more fixes applied: missing shared Zod schema task, an unspecified confirm timeout (now 5 seconds), no test for the confirm *cancel* path, no in widget "you shipped" signal, and no failure path (a ship call that errors after the server commits now forces a `launch_status` reload). Also corrected a claim: ship is the **second** app only tool, not the third (the theme toggle is local React state and never was a visibility decision). `ui/message` API verified from the installed types: `app.sendMessage({ role: "user", content: ContentBlock[] })`, guarded by `getHostCapabilities()?.message?.text`. Spec status `Proposed`; nothing built yet.
+
 ### [feature] Added launch_item_move (conversational reorder); foundation to v4
 - **Date:** 2026-07-23
 - **Area:** server, context, docs/specs
