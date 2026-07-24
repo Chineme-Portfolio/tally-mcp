@@ -20,6 +20,12 @@ Category one of: `feature` · `fix` · `refactor` · `chore` · `decision` · `d
 
 ## Entries
 
+### [chore] Deployed Tally to Railway + pushed to GitHub (Chineme-Portfolio)
+- **Date:** 2026-07-24
+- **Area:** infra
+- **What:** The v1 milestone: Tally is live and public. (1) **GitHub**: pushed to https://github.com/Chineme-Portfolio/tally-mcp (public), two commits (the Helm → Tally rename, then the board model + deploy config); `.gitignore` keeps `.env` out. (2) **Railway**: project `tally-mcp` in "Allison's Projects" with a **Postgres** service + the **tally** app service. `railway.json` drives Nixpacks (build the widget, then `db:migrate && db:seed && start`); `drizzle-kit` moved to `dependencies` so the migration runs on deploy; `seed.ts` now creates the `board` module row + a default "Launch readiness" board. App vars: `DATABASE_URL` → `${{Postgres.DATABASE_URL}}` (the private `postgres.railway.internal` url), `DEFAULT_USER_ID`. (3) **Deploy succeeded on a fresh DB**: all 3 migrations applied, the seed ran, the server bound Railway's injected port (8080). **Public MCP endpoint: https://tally-production-8b17.up.railway.app/mcp**. Smoke tested live: `initialize` returns `serverInfo` name `tally`; `tools/list` = 16 `board_*` tools; `board_status` returns the seeded "Launch readiness" board.
+- **Notes:** No auth (single tenant, `foundation.md` §7 #6): anyone with the URL operates the same default board, which is the intended v1 / self-host model but worth knowing for a public URL. To use it in Claude Desktop, add a **custom connector** at `.../mcp` (remove any old local Helm/launch connector first, to avoid stale `launch_*` tools). Spec 0004 stays `In Progress` until the in-Claude checks pass (AC-7 widget tabs, AC-8 the checklist grab); then `/check verify` → the `foundation.md` v6 board-model update → `Accepted`. The Railway domain shows "Target port: -" but routes correctly (the live curl confirmed it); set it explicitly only if the URL ever 502s.
+
 ### [feature] Board model built (spec 0004): many named boards, general + launch flavored
 - **Date:** 2026-07-24
 - **Area:** db, server, shared, widget
