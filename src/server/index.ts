@@ -10,6 +10,7 @@ import type { RequestHandler } from "express";
 import { localAccount, resolveAccount, type UserId } from "./auth/identity.js";
 import { clerkTokenVerifier, principalFrom } from "./auth/verifier.js";
 import { authRequired, env } from "./env.js";
+import { ICON_SVG } from "./icon.js";
 import { createServer } from "./mcp.js";
 
 // Streamable HTTP entry point. Claude connects to <host>/mcp.
@@ -20,6 +21,14 @@ import { createServer } from "./mcp.js";
 // user is resolved per request and handed to createServer.
 const app = createMcpExpressApp({ host: "0.0.0.0" });
 app.use(cors());
+
+// The server's icon, deliberately PUBLIC and outside the auth gate below: a
+// client fetches it to render Tally in a connector list, before anyone has
+// signed in and with no token to present. It is a static image and reveals
+// nothing about any account.
+app.get("/icon.svg", (_req, res) => {
+  res.type("image/svg+xml").set("Cache-Control", "public, max-age=86400").send(ICON_SVG);
+});
 
 // Authentication (spec 0005). Tally is an OAuth resource server: Clerk issues
 // and signs tokens, Tally only verifies them.

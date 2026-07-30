@@ -20,6 +20,12 @@ Category one of: `feature` · `fix` · `refactor` · `chore` · `decision` · `d
 
 ## Entries
 
+### [chore] Authentication deployed: the public instance now requires a token
+- **Date:** 2026-07-30
+- **Area:** infra
+- **What:** Shipped spec 0005 to Railway (commit `b4b8793`, deployment `422dece5`). Set `CLERK_ISSUER_URL` and `TALLY_RESOURCE_URL` on the service **before** pushing, deliberately: `AUTH_MODE` is left unset (auth on by the fail closed default), and because the start command chains `db:migrate && db:seed && start`, pushing without the Clerk config would have wiped production and then crashed in the seed, leaving the service down. **Production verified after the deploy**: an unauthenticated call to `/mcp` returns **401** with `WWW-Authenticate` carrying the `resource_metadata` url (AC-1); `/.well-known/oauth-protected-resource` serves the RFC 9728 document naming Clerk as the authorization server and the Railway url as the resource (AC-2); and a forged token is rejected with 401 (AC-11). **The exposure is closed**: the URL that previously served any visitor the owner's board now rejects unauthenticated requests.
+- **Notes:** The deploy sat **QUEUED for about 10 minutes** before building, with no Railway incident reported; worth knowing so a slow deploy is not mistaken for a stuck one. Two logs read during that window were from the previous deployment and briefly looked like success, which is why the check that matters is the **401 on `/mcp`**, not the service showing Online. Production data was wiped by the migration as designed. **Still outstanding, all needing a real sign in through Claude:** the end to end OAuth flow, **AC-4 the two account isolation test (the actual security claim)**, caps at runtime (AC-7), the widget's real 401 shape (AC-8), and what Clerk puts in the `aud` claim. See `docs/specs/0005-accounts-auth/verify.md`.
+
 ### [feature] Accounts and authentication built (spec 0005, tasks 1 to 9): OAuth resource server
 - **Date:** 2026-07-25
 - **Area:** db, server, widget

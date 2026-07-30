@@ -111,6 +111,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       description:
         "Renders my board (a checklist) as an interactive widget inline, with a tab per board.",
       inputSchema: {},
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { resourceUri: BOARD_RESOURCE_URI, visibility: ["model", "app"] } },
     },
     async () => {
@@ -130,6 +131,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       description:
         "Returns the current board's items and readiness, plus the list of boards (tabs).",
       inputSchema: {},
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async () => {
@@ -146,6 +148,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       title: "List my boards",
       description: "Lists all my boards (checklists) with their item counts and readiness.",
       inputSchema: {},
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async () => {
@@ -164,6 +167,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       description:
         "Creates a new board (a checklist) by name and makes it current. Use this for any new checklist or to-do list, then add items with board_item_add.",
       inputSchema: CreateBoardInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
@@ -180,6 +184,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       title: "Switch board",
       description: "Switches to one of my boards by name, making it the current board.",
       inputSchema: SwitchBoardInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
@@ -196,6 +201,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       title: "Rename board",
       description: "Renames the current board.",
       inputSchema: RenameBoardInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
@@ -213,6 +219,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       description:
         "Deletes a board by name and removes its items. Its past shipped records are kept. If it was current, the next board becomes current.",
       inputSchema: DeleteBoardInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: true,  idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
@@ -228,6 +235,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       title: "Add an item",
       description: "Adds an item to the current board.",
       inputSchema: AddInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: false, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
@@ -243,6 +251,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       title: "Edit an item",
       description: "Changes an item's text on the current board.",
       inputSchema: EditInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
@@ -258,6 +267,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       title: "Set an item's status",
       description: "Sets an item to todo, active, blocked, or done on the current board.",
       inputSchema: SetStatusInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
@@ -273,6 +283,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       title: "Delete an item",
       description: "Removes an item from the current board.",
       inputSchema: DeleteInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: true,  idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
@@ -291,6 +302,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       description:
         "Moves an item to a new position (0 is the top) on the current board. Use this to reorder from the conversation.",
       inputSchema: MoveInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
@@ -306,6 +318,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       title: "Reset the board",
       description: "Sets every item on the current board back to todo.",
       inputSchema: {},
+      annotations: { readOnlyHint: false, destructiveHint: true,  idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async () => {
@@ -323,6 +336,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       title: "Reorder items",
       description: "Persists a new item order on the current board (drag to reorder).",
       inputSchema: ReorderInput.shape,
+      annotations: { readOnlyHint: false, destructiveHint: false, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["app"] } },
     },
     async (args) => {
@@ -342,6 +356,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       description:
         "Archives the finished board as a record and clears it for the next run. Only allowed when every item is done.",
       inputSchema: {},
+      annotations: { readOnlyHint: false, destructiveHint: true,  idempotentHint: false, openWorldHint: false },
       _meta: { ui: { visibility: ["app"] } },
     },
     async () => {
@@ -362,6 +377,7 @@ export function registerBoard(server: McpServer, userId: UserId): void {
       description:
         "Returns recent shipped boards across all my boards (date, board name, item count, titles).",
       inputSchema: HistoryInput.shape,
+      annotations: { readOnlyHint: true, idempotentHint: true, openWorldHint: false },
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => toolResult(await listRuns(userId, args.limit)),
