@@ -91,6 +91,23 @@ body {
   width: 150px;
 }
 
+/* Session expired: shown when a tool call fails in a way that looks like the
+   access token died. Deliberately loud, so an expired session never reads as
+   an empty board (spec 0005 AC-8). */
+.hw__expired {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: 0 14px 10px;
+  padding: 10px 12px;
+  border: 1px solid var(--warning-border, var(--border-strong));
+  border-radius: var(--radius-md);
+  background: var(--warning-surface, var(--surface-sunken));
+  color: var(--text-strong);
+  font-size: 13px;
+  line-height: 1.4;
+}
+
 .hw__meter {
   padding: 18px 18px 8px;
 }

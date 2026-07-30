@@ -24,6 +24,7 @@ import {
   SetStatusInput,
   SwitchBoardInput,
 } from "../../../shared/board.js";
+import type { UserId } from "../../auth/identity.js";
 import {
   addItem,
   boardView,
@@ -98,7 +99,7 @@ function summarizeList(boards: BoardSummary[]): string {
 // Visibility (foundation.md §7 #10, #11, #17): reads and writes are model+app so
 // Claude and the widget both operate boards; only board_item_reorder (a drag)
 // and board_ship (a human commitment that clears the board) are app only.
-export function registerBoard(server: McpServer): void {
+export function registerBoard(server: McpServer, userId: UserId): void {
   // Render tool. Linking it to the resource via _meta.ui.resourceUri is what
   // makes the host render the widget. It also returns the current board (with
   // the tab set) so Claude has the state.
@@ -113,7 +114,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { resourceUri: BOARD_RESOURCE_URI, visibility: ["model", "app"] } },
     },
     async () => {
-      const view = await boardView();
+      const view = await boardView(userId);
       return toolResult(view, summarizeView(view));
     },
   );
@@ -132,7 +133,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async () => {
-      const view = await boardView();
+      const view = await boardView(userId);
       return toolResult(view, summarizeView(view));
     },
   );
@@ -148,7 +149,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async () => {
-      const list = await listBoards();
+      const list = await listBoards(userId);
       return toolResult(list, summarizeList(list.boards));
     },
   );
@@ -166,7 +167,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
-      const view = await createBoard(args.name);
+      const view = await createBoard(userId, args.name);
       return toolResult(view, summarizeView(view));
     },
   );
@@ -182,7 +183,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
-      const view = await switchBoard(args.name);
+      const view = await switchBoard(userId, args.name);
       return toolResult(view, summarizeView(view));
     },
   );
@@ -198,7 +199,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
-      const view = await renameBoard(args.name);
+      const view = await renameBoard(userId, args.name);
       return toolResult(view, summarizeView(view));
     },
   );
@@ -215,7 +216,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
-      const view = await deleteBoard(args.name);
+      const view = await deleteBoard(userId, args.name);
       return toolResult(view, summarizeView(view));
     },
   );
@@ -230,7 +231,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
-      const m = await addItem(args.title);
+      const m = await addItem(userId, args.title);
       return toolResult(m, summarizeState(m.board.name, m.items, m.readiness));
     },
   );
@@ -245,7 +246,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
-      const m = await editItem(args.id, args.title);
+      const m = await editItem(userId, args.id, args.title);
       return toolResult(m, summarizeState(m.board.name, m.items, m.readiness));
     },
   );
@@ -260,7 +261,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
-      const m = await setStatus(args.id, args.status);
+      const m = await setStatus(userId, args.id, args.status);
       return toolResult(m, summarizeState(m.board.name, m.items, m.readiness));
     },
   );
@@ -275,7 +276,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
-      const m = await deleteItem(args.id);
+      const m = await deleteItem(userId, args.id);
       return toolResult(m, summarizeState(m.board.name, m.items, m.readiness));
     },
   );
@@ -293,7 +294,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async (args) => {
-      const m = await moveItem(args.id, args.position);
+      const m = await moveItem(userId, args.id, args.position);
       return toolResult(m, summarizeState(m.board.name, m.items, m.readiness));
     },
   );
@@ -308,7 +309,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["model", "app"] } },
     },
     async () => {
-      const m = await resetBoard();
+      const m = await resetBoard(userId);
       return toolResult(m, summarizeState(m.board.name, m.items, m.readiness));
     },
   );
@@ -325,7 +326,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["app"] } },
     },
     async (args) => {
-      const m = await reorder(args.orderedIds);
+      const m = await reorder(userId, args.orderedIds);
       return toolResult(m, summarizeState(m.board.name, m.items, m.readiness));
     },
   );
@@ -344,7 +345,7 @@ export function registerBoard(server: McpServer): void {
       _meta: { ui: { visibility: ["app"] } },
     },
     async () => {
-      const result: ShipResult = await shipBoard();
+      const result: ShipResult = await shipBoard(userId);
       const text = `Shipped "${result.board.name}". ${result.run.itemCount} done, board's clear.`;
       return toolResult(result, text);
     },
@@ -363,7 +364,7 @@ export function registerBoard(server: McpServer): void {
       inputSchema: HistoryInput.shape,
       _meta: { ui: { visibility: ["model", "app"] } },
     },
-    async (args) => toolResult(await listRuns(args.limit)),
+    async (args) => toolResult(await listRuns(userId, args.limit)),
   );
 
   // The widget resource: one self contained HTML file built by vite-singlefile.

@@ -1,7 +1,7 @@
 # 0005. Accounts and authentication: real multi user Tally
 
 **Date**: 2026-07-25
-**Status**: Proposed
+**Status**: In Progress
 
 ## Summary
 
@@ -115,6 +115,8 @@ No other new HTTP surface. Tally hosts **no** OAuth callback: Claude is the OAut
 ## Build plan
 
 Tracer Bullet (the project default, from specs 0002 to 0004; `AGENTS.md` records no approach). Tasks 1 to 6 are one thin thread: a real token reaching one scoped tool call end to end. Only once that thread is alive does the plan thicken with caps, widget state, and hygiene.
+
+> **Build progress (2026-07-25): tasks 1 to 9 are built, typechecking, and verified server side.** Task 10 is partly done: the local and negative paths are proven (the 401 challenge, the metadata document, a forged token rejected, the production guards, the auth off regression), but the parts needing a real Clerk token and a live connector are not, because they require the deploy. Still outstanding: a genuine end to end OAuth sign in, the two user isolation test (AC-4, the actual security claim), the caps at runtime (AC-7, currently code reviewed only), the widget's real 401 error shape (AC-8, built to the documented fallback), and confirming what Clerk puts in the `aud` claim.
 
 1. **Migration, and fix the seed in the same task.** Delete existing rows, then add `auth_subject` (not null, unique), `email`, and `updated_at` to `users`. Read the generated SQL before applying it, per the spec 0004 discipline. **`src/server/db/seed.ts` must be updated in this same task**: it currently inserts a user with no `auth_subject`, which violates the new not null constraint (and `onConflictDoNothing` does not suppress a not null violation, only a unique one). Because `railway.json` chains `db:migrate && db:seed && start`, a failing seed means the server never starts and the service crash loops. Give the seeded local user a sentinel subject (for example `local-no-auth`) alongside `DEFAULT_USER_ID`. Satisfies **AC-9**.
 2. **Clerk setup and configuration.** Instance with Google and GitHub, account linking on, DCR confirmed on; add `AUTH_MODE`, `CLERK_ISSUER_URL`, and `TALLY_RESOURCE_URL` to `env.ts` (validated with Zod, failing closed) and to `.env.example`. Satisfies **AC-5**, **AC-6** (setup).

@@ -1,4 +1,4 @@
-import { and, asc, desc, eq, inArray, sql } from "drizzle-orm";
+import { and, asc, count, desc, eq, inArray, sql } from "drizzle-orm";
 import type {
   BoardItem,
   BoardItemStatus,
@@ -11,6 +11,7 @@ import type {
   HistoryOutput,
   ShipResult,
 } from "../../../shared/board.js";
+import type { UserId } from "../../auth/identity.js";
 import { db } from "../../db/client.js";
 import {
   type BoardItemRow,
@@ -19,15 +20,22 @@ import {
   boardRuns,
   boards,
 } from "../../db/schema.js";
-import { resolveUserId } from "../../user.js";
 
-// All access to the board tables lives here. EVERY query filters by
-// resolveUserId() (code-standards.md §5), and every item/status/ship query ALSO
-// filters by the current board_id (spec 0004), so an action never touches
-// another board. An unscoped query is a bug.
+// All access to the board tables lives here. EVERY query filters by the owner's
+// `userId`, which arrives as an explicit argument (spec 0005): there is no
+// ambient user, so a missed call site fails to compile rather than silently
+// reading someone else's data. Item queries additionally filter by `board_id`
+// (spec 0004), so an action never touches another board. An unscoped query is a
+// bug, and the `UserId` brand means only the identity mapping can mint one.
 
 // The board a brand new owner gets, and the name the migration seeded.
 const DEFAULT_BOARD_NAME = "Launch readiness";
+
+// Per user ceilings (spec 0005, AC-7). These exist for cost control on a public
+// deployment, not as a hard invariant, so the count then insert check below is
+// allowed to overshoot slightly under concurrent calls.
+export const MAX_BOARDS_PER_USER = 25;
+export const MAX_ITEMS_PER_BOARD = 200;
 
 function toItem(row: BoardItemRow): BoardItem {
   return { id: row.id, title: row.title, status: row.status, position: row.position };
@@ -51,8 +59,7 @@ function isUniqueViolation(e: unknown): boolean {
 // two near simultaneous calls collide on the unique (user_id, name) index, one
 // insert wins, and both read the same row back. This is the ONLY definition of
 // "current"; nothing else re derives it.
-async function currentBoard(): Promise<BoardRow> {
-  const userId = resolveUserId();
+async function currentBoard(userId: UserId): Promise<BoardRow> {
   const [existing] = await db
     .select()
     .from(boards)
@@ -75,8 +82,7 @@ async function currentBoard(): Promise<BoardRow> {
 
 // The state of one board: its items in order, plus readiness (empty reads 0,
 // never NaN).
-async function boardStateFor(boardId: string): Promise<BoardState> {
-  const userId = resolveUserId();
+async function boardStateFor(userId: UserId, boardId: string): Promise<BoardState> {
   const rows = await db
     .select()
     .from(boardItems)
@@ -92,8 +98,7 @@ async function boardStateFor(boardId: string): Promise<BoardState> {
 // Every board as a tab: identity, whether it is current, and its counts. Counts
 // are grouped in memory (a personal tool has few boards and items), which keeps
 // this one owner scoped item read instead of a per board query.
-async function boardSummaries(currentId: string): Promise<BoardSummary[]> {
-  const userId = resolveUserId();
+async function boardSummaries(userId: UserId, currentId: string): Promise<BoardSummary[]> {
   const boardRows = await db
     .select()
     .from(boards)
@@ -118,51 +123,57 @@ async function boardSummaries(currentId: string): Promise<BoardSummary[]> {
 }
 
 // The widget's mount fetch: the current board, all boards as tabs, its items.
-export async function boardView(): Promise<BoardView> {
-  const board = await currentBoard();
-  const state = await boardStateFor(board.id);
-  const summaries = await boardSummaries(board.id);
+export async function boardView(userId: UserId): Promise<BoardView> {
+  const board = await currentBoard(userId);
+  const state = await boardStateFor(userId, board.id);
+  const summaries = await boardSummaries(userId, board.id);
   return { board: ref(board), boards: summaries, ...state };
 }
 
 // board_list: every board as a tab, for Claude.
-export async function listBoards(): Promise<BoardList> {
-  const board = await currentBoard();
-  return { boards: await boardSummaries(board.id) };
+export async function listBoards(userId: UserId): Promise<BoardList> {
+  const board = await currentBoard(userId);
+  return { boards: await boardSummaries(userId, board.id) };
 }
 
 // ---- Board management (spec 0004) ----
 
 // Create a board and make it current (its default last_active_at = now() is the
 // latest). A duplicate name is a clean error, never a raw unique violation.
-export async function createBoard(name: string): Promise<BoardView> {
-  const userId = resolveUserId();
+export async function createBoard(userId: UserId, name: string): Promise<BoardView> {
+  const [{ value: boardCount }] = await db
+    .select({ value: count() })
+    .from(boards)
+    .where(eq(boards.userId, userId));
+  if (boardCount >= MAX_BOARDS_PER_USER) {
+    throw new Error(
+      `you have reached the limit of ${MAX_BOARDS_PER_USER} boards; delete one before creating another`,
+    );
+  }
   try {
     await db.insert(boards).values({ userId, name });
   } catch (e) {
     if (isUniqueViolation(e)) throw new Error(`a board named "${name}" already exists`);
     throw e;
   }
-  return boardView();
+  return boardView(userId);
 }
 
 // Switch the current board by name. The update both makes it current and proves
 // it exists (RETURNING); an unknown name is a clean error, never a silent create.
-export async function switchBoard(name: string): Promise<BoardView> {
-  const userId = resolveUserId();
+export async function switchBoard(userId: UserId, name: string): Promise<BoardView> {
   const [b] = await db
     .update(boards)
     .set({ lastActiveAt: sql`now()` })
     .where(and(eq(boards.userId, userId), eq(boards.name, name)))
     .returning({ id: boards.id });
   if (!b) throw new Error(`no board named "${name}"`);
-  return boardView();
+  return boardView(userId);
 }
 
 // Rename the current board. Colliding with another board's name is a clean error.
-export async function renameBoard(name: string): Promise<BoardView> {
-  const userId = resolveUserId();
-  const board = await currentBoard();
+export async function renameBoard(userId: UserId, name: string): Promise<BoardView> {
+  const board = await currentBoard(userId);
   try {
     await db
       .update(boards)
@@ -172,44 +183,54 @@ export async function renameBoard(name: string): Promise<BoardView> {
     if (isUniqueViolation(e)) throw new Error(`a board named "${name}" already exists`);
     throw e;
   }
-  return boardView();
+  return boardView(userId);
 }
 
 // Delete a board by name. ON DELETE CASCADE removes its items in one statement;
 // its past ships survive (board_id set null, board_name snapshot kept). If it
 // was current, boardView() picks the next by last_active_at, or seeds a default
 // if none remain. An unknown name is a clean error.
-export async function deleteBoard(name: string): Promise<BoardView> {
-  const userId = resolveUserId();
+export async function deleteBoard(userId: UserId, name: string): Promise<BoardView> {
   const deleted = await db
     .delete(boards)
     .where(and(eq(boards.userId, userId), eq(boards.name, name)))
     .returning({ id: boards.id });
   if (deleted.length === 0) throw new Error(`no board named "${name}"`);
-  return boardView();
+  return boardView(userId);
 }
 
 // ---- Item operations (on the current board) ----
 
-export async function addItem(title: string): Promise<BoardMutation> {
-  const userId = resolveUserId();
-  const board = await currentBoard();
+export async function addItem(userId: UserId, title: string): Promise<BoardMutation> {
+  const board = await currentBoard(userId);
   const rows = await db
     .select({ position: boardItems.position })
     .from(boardItems)
     .where(and(eq(boardItems.userId, userId), eq(boardItems.boardId, board.id)));
+  if (rows.length >= MAX_ITEMS_PER_BOARD) {
+    throw new Error(
+      `this board has reached the limit of ${MAX_ITEMS_PER_BOARD} items; delete one before adding another`,
+    );
+  }
   const nextPosition = rows.reduce((max, r) => Math.max(max, r.position), -1) + 1;
   const [row] = await db
     .insert(boardItems)
     .values({ userId, boardId: board.id, title, position: nextPosition })
     .returning();
   if (!row) throw new Error("board_item_add: insert returned no row");
-  return { board: ref(board), item: toItem(row), ...(await boardStateFor(board.id)) };
+  return {
+    board: ref(board),
+    item: toItem(row),
+    ...(await boardStateFor(userId, board.id)),
+  };
 }
 
-export async function editItem(id: string, title: string): Promise<BoardMutation> {
-  const userId = resolveUserId();
-  const board = await currentBoard();
+export async function editItem(
+  userId: UserId,
+  id: string,
+  title: string,
+): Promise<BoardMutation> {
+  const board = await currentBoard(userId);
   const [row] = await db
     .update(boardItems)
     .set({ title })
@@ -222,15 +243,19 @@ export async function editItem(id: string, title: string): Promise<BoardMutation
     )
     .returning();
   if (!row) throw new Error(`board_item_edit: item ${id} not found on this board`);
-  return { board: ref(board), item: toItem(row), ...(await boardStateFor(board.id)) };
+  return {
+    board: ref(board),
+    item: toItem(row),
+    ...(await boardStateFor(userId, board.id)),
+  };
 }
 
 export async function setStatus(
+  userId: UserId,
   id: string,
   status: BoardItemStatus,
 ): Promise<BoardMutation> {
-  const userId = resolveUserId();
-  const board = await currentBoard();
+  const board = await currentBoard(userId);
   const [row] = await db
     .update(boardItems)
     .set({ status })
@@ -243,12 +268,15 @@ export async function setStatus(
     )
     .returning();
   if (!row) throw new Error(`board_item_set_status: item ${id} not found on this board`);
-  return { board: ref(board), item: toItem(row), ...(await boardStateFor(board.id)) };
+  return {
+    board: ref(board),
+    item: toItem(row),
+    ...(await boardStateFor(userId, board.id)),
+  };
 }
 
-export async function deleteItem(id: string): Promise<BoardMutation> {
-  const userId = resolveUserId();
-  const board = await currentBoard();
+export async function deleteItem(userId: UserId, id: string): Promise<BoardMutation> {
+  const board = await currentBoard(userId);
   const removed = await db
     .delete(boardItems)
     .where(
@@ -262,25 +290,23 @@ export async function deleteItem(id: string): Promise<BoardMutation> {
   if (removed.length === 0) {
     throw new Error(`board_item_delete: item ${id} not found on this board`);
   }
-  return { board: ref(board), ...(await boardStateFor(board.id)) };
+  return { board: ref(board), ...(await boardStateFor(userId, board.id)) };
 }
 
-export async function resetBoard(): Promise<BoardMutation> {
-  const userId = resolveUserId();
-  const board = await currentBoard();
+export async function resetBoard(userId: UserId): Promise<BoardMutation> {
+  const board = await currentBoard(userId);
   await db
     .update(boardItems)
     .set({ status: "todo" })
     .where(and(eq(boardItems.userId, userId), eq(boardItems.boardId, board.id)));
-  return { board: ref(board), ...(await boardStateFor(board.id)) };
+  return { board: ref(board), ...(await boardStateFor(userId, board.id)) };
 }
 
 // Reorder the current board in one transaction (all or nothing). The given order
 // wins; the board's items missing from the list are appended in their current
 // order; unknown ids are ignored (spec 0002).
-export async function reorder(orderedIds: string[]): Promise<BoardMutation> {
-  const userId = resolveUserId();
-  const board = await currentBoard();
+export async function reorder(userId: UserId, orderedIds: string[]): Promise<BoardMutation> {
+  const board = await currentBoard(userId);
   await db.transaction(async (tx) => {
     const rows = await tx
       .select({ id: boardItems.id })
@@ -313,15 +339,18 @@ export async function reorder(orderedIds: string[]): Promise<BoardMutation> {
         );
     }
   });
-  return { board: ref(board), ...(await boardStateFor(board.id)) };
+  return { board: ref(board), ...(await boardStateFor(userId, board.id)) };
 }
 
 // Move one task to a target position (0 is the top) on the current board. This
 // is Claude's conversational reorder ("move X to the top"); the widget's drag
 // uses reorder() instead (spec 0002 follow up).
-export async function moveItem(id: string, position: number): Promise<BoardMutation> {
-  const userId = resolveUserId();
-  const board = await currentBoard();
+export async function moveItem(
+  userId: UserId,
+  id: string,
+  position: number,
+): Promise<BoardMutation> {
+  const board = await currentBoard(userId);
   await db.transaction(async (tx) => {
     const rows = await tx
       .select({ id: boardItems.id })
@@ -347,7 +376,7 @@ export async function moveItem(id: string, position: number): Promise<BoardMutat
         );
     }
   });
-  return { board: ref(board), ...(await boardStateFor(board.id)) };
+  return { board: ref(board), ...(await boardStateFor(userId, board.id)) };
 }
 
 // Ship the current board (spec 0003, app only). The read, the "all done" check,
@@ -356,9 +385,8 @@ export async function moveItem(id: string, position: number): Promise<BoardMutat
 // at the same time is either archived with the rest or left on the board, never
 // silently lost (the 0003 cross-check finding, carried forward). The board stays
 // (now empty); a separate board_delete removes a board.
-export async function shipBoard(): Promise<ShipResult> {
-  const userId = resolveUserId();
-  const board = await currentBoard();
+export async function shipBoard(userId: UserId): Promise<ShipResult> {
+  const board = await currentBoard(userId);
   const run = await db.transaction(async (tx) => {
     const rows = await tx
       .select()
@@ -411,8 +439,7 @@ export async function shipBoard(): Promise<ShipResult> {
 
 // Recent launches across ALL the owner's boards, newest first; each run carries
 // the name of the board it shipped from (spec 0003 + 0004).
-export async function listRuns(limit = 5): Promise<HistoryOutput> {
-  const userId = resolveUserId();
+export async function listRuns(userId: UserId, limit = 5): Promise<HistoryOutput> {
   const capped = Math.min(Math.max(Math.trunc(limit), 1), 20);
   const rows = await db
     .select()

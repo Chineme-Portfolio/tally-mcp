@@ -21,13 +21,32 @@ export const boardItemStatus = pgEnum("board_item_status", [
   "done",
 ]);
 
-// One row in v1 (the default user). user_id everywhere scopes to it.
-export const users = pgTable("users", {
-  id: uuid("id").primaryKey().defaultRandom(),
-  createdAt: timestamp("created_at", { withTimezone: true })
-    .notNull()
-    .defaultNow(),
-});
+// An account (spec 0005). One row per signed in person; `user_id` on every
+// other table scopes that person's data. The row is created on first sign in.
+export const users = pgTable(
+  "users",
+  {
+    id: uuid("id").primaryKey().defaultRandom(),
+    // The identity provider's stable subject claim (Clerk's `sub`), or the
+    // local sentinel when AUTH_MODE=none. This is the identity key: one
+    // person is one subject is one row. Clerk's account linking means Google
+    // and GitHub for the same person resolve to the same subject.
+    authSubject: text("auth_subject").notNull(),
+    // From the verified token claims, refreshed when it changes at the
+    // provider. Nullable: a provider need not supply an email.
+    email: text("email"),
+    createdAt: timestamp("created_at", { withTimezone: true })
+      .notNull()
+      .defaultNow(),
+    updatedAt: timestamp("updated_at", { withTimezone: true })
+      .notNull()
+      .defaultNow()
+      .$onUpdate(() => sql`now()`),
+  },
+  (t) => [unique("users_auth_subject_unique").on(t.authSubject)],
+);
+
+export type UserRow = typeof users.$inferSelect;
 
 // The module registry seam (foundation.md §9). Thin in v1: one row, key "board".
 // Module two attaches here without a schema change.

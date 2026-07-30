@@ -11,6 +11,7 @@ import {
 import {
   HBadge,
   HButton,
+  HIcon,
   HIconButton,
   HInput,
   HItem,
@@ -64,6 +65,8 @@ export function App() {
 
   const [ready, setReady] = useState(false);
   const [status, setStatus] = useState("connecting");
+  // True when the session looks expired and the connector needs reconnecting.
+  const [expired, setExpired] = useState(false);
   const [filter, setFilter] = useState<Filter>("all");
   const [draft, setDraft] = useState("");
   const [editingId, setEditingId] = useState<string | null>(null);
@@ -108,14 +111,42 @@ export function App() {
     void done;
   }
 
+  // Access tokens expire (about an hour) and hosts do not reliably refresh them
+  // mid conversation, so a tool call can start failing part way through a
+  // session. Whether the host bridge tells widget code that the failure was an
+  // auth failure is a host detail we cannot rely on, so this sniffs the error
+  // text and falls back to a generic reconnect message when it cannot tell.
+  // Either way the board never just sits there looking empty (spec 0005 AC-8).
+  function looksLikeAuthFailure(e: unknown): boolean {
+    const text = String(e).toLowerCase();
+    return (
+      text.includes("401") ||
+      text.includes("unauthorized") ||
+      text.includes("unauthenticated") ||
+      text.includes("authentication") ||
+      text.includes("invalid_token") ||
+      text.includes("expired")
+    );
+  }
+
+  function reportError(e: unknown) {
+    if (looksLikeAuthFailure(e)) {
+      setExpired(true);
+      setStatus("session expired");
+    } else {
+      setStatus(`error: ${String(e)}`);
+    }
+  }
+
   async function callView(name: string, args: Record<string, unknown> = {}) {
     if (!app) return null;
     try {
       const view = readView(await app.callServerTool({ name, arguments: args }));
       applyView(view);
+      setExpired(false);
       return view;
     } catch (e) {
-      setStatus(`error: ${String(e)}`);
+      reportError(e);
       return null;
     }
   }
@@ -125,9 +156,10 @@ export function App() {
     try {
       const m = readMutation(await app.callServerTool({ name, arguments: args }));
       applyMutation(m);
+      setExpired(false);
       return m;
     } catch (e) {
-      setStatus(`error: ${String(e)}`);
+      reportError(e);
       return null;
     }
   }
@@ -361,6 +393,16 @@ export function App() {
           ]}
         />
       </div>
+
+      {expired && (
+        <div className="hw__expired" role="status">
+          <HIcon name="alert-circle" size={16} />
+          <span>
+            Session expired. Reconnect the Tally connector in your settings to pick up
+            where you left off.
+          </span>
+        </div>
+      )}
 
       <div className="hw__list">
         {shown.map((t) => (
